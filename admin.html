@@ -5,18 +5,18 @@
 <meta name="theme-color" content="#0b1020"><title>QuantumFlow • Admin</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-.admin{max-width:1100px;margin:auto;padding:20px 16px 50px}.admin-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.admin-head h1{margin:4px 0}.admin-brand{font-size:13px;color:var(--primary);font-weight:800;letter-spacing:.12em;text-transform:uppercase}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px}.stat{padding:18px;position:relative;overflow:hidden}.stat strong{display:block;font-size:30px;margin-top:8px}.stat small{color:var(--muted)}.section{margin-top:16px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.section-title h2{margin:0}.panel{padding:18px}.table-wrap{overflow:auto}.users table{width:100%;border-collapse:collapse;min-width:620px}.users th,.users td{text-align:left;padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.users th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--card2);margin-right:8px;font-weight:800;color:var(--primary);vertical-align:middle}.email{font-weight:650}.status{display:inline-flex;align-items:center;gap:6px}.status:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green)}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.notice{padding:14px;border-radius:14px;margin:12px 0}.error{background:rgba(255,80,100,.1);border:1px solid rgba(255,80,100,.2)}.ok{background:rgba(80,220,150,.1);border:1px solid rgba(80,220,150,.2)}.loading{opacity:.65}.empty{text-align:center;padding:30px;color:var(--muted)}.bar-row{display:grid;grid-template-columns:110px 1fr 55px;align-items:center;gap:10px;margin:12px 0}.bar-row .bar{height:9px}.danger-text{color:var(--red)}@media(max-width:600px){.admin-head{align-items:flex-start}.admin-head .toolbar{justify-content:flex-end}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:25px}.bar-row{grid-template-columns:85px 1fr 45px;font-size:12px}}
+.admin{max-width:1120px;margin:auto;padding:20px 16px 55px}.admin-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.admin-head h1{margin:4px 0}.admin-brand{font-size:13px;color:var(--primary);font-weight:800;letter-spacing:.12em;text-transform:uppercase}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{padding:18px}.stat strong{display:block;font-size:30px;margin-top:8px}.stat small{color:var(--muted)}.section{margin-top:16px}.panel{padding:18px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.section-title h2{margin:0}.toolbar,.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.filters input{margin:0;min-width:220px}.select{padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text)}.chart-wrap{height:330px;position:relative}.table-wrap{overflow:auto}.users table{width:100%;border-collapse:collapse;min-width:650px}.users th,.users td{text-align:left;padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.users th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--card2);margin-right:8px;font-weight:800;color:var(--primary);vertical-align:middle}.email{font-weight:650}.status{display:inline-flex;align-items:center;gap:6px}.status:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green)}.empty{text-align:center;padding:30px;color:var(--muted)}.notice{padding:14px;border-radius:14px;margin:12px 0}.error{background:rgba(255,80,100,.1);border:1px solid rgba(255,80,100,.2)}.loading{opacity:.65}.muted2{color:var(--muted);font-size:12px}.pager{display:flex;justify-content:space-between;align-items:center;margin-top:12px}.pill{cursor:pointer}.pill.active{color:var(--text);border-color:var(--primary)}@media(max-width:600px){.admin-head{align-items:flex-start}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:25px}.chart-wrap{height:270px}.filters input{min-width:0;flex:1}}
 </style>
 </head>
 <body>
 <main class="admin" id="admin"><div class="card loading"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow administrator access.</p></div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script><script src="supabase.js"></script>
 <script>
 const root=document.getElementById('admin');
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const fmt=d=>d?new Date(d).toLocaleString([], {dateStyle:'medium',timeStyle:'short'}):'Never';
 const initials=e=>(String(e||'?').trim()[0]||'?').toUpperCase();
-let cache={stats:null,users:[]};
+let cache={stats:{},users:[],activity:[]}, chart=null, days=14, search='', page=0;
 async function load(){
  root.innerHTML='<div class="card loading"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow administrator access.</p></div>';
  try{
@@ -24,36 +24,35 @@ async function load(){
   if(!session){root.innerHTML='<div class="card"><h2>🔐 Admin sign-in required</h2><p class="muted">Sign in to QuantumFlow first, then open this page again.</p><a class="btn" href="./">Open QuantumFlow</a></div>';return;}
   const {data:isAdmin,error:roleError}=await supabaseClient.rpc('is_quantumflow_admin');
   if(roleError||!isAdmin){root.innerHTML='<div class="card"><h2>🚫 Access denied</h2><p class="muted">This account is not registered as a QuantumFlow administrator.</p><a class="btn secondary" href="./">Back to app</a></div>';return;}
-  const [{data:stats,error:statsError},{data:users,error:usersError}]=await Promise.all([supabaseClient.rpc('admin_stats'),supabaseClient.rpc('admin_user_list')]);
-  if(statsError||usersError)throw new Error(statsError?.message||usersError?.message||'Unable to load admin data');
-  cache={stats:stats?.[0]||{},users:users||[]};render();
+  await refreshData();
  }catch(e){root.innerHTML='<div class="card"><h2>Could not load admin data</h2><div class="notice error">'+esc(e.message)+'</div><button class="btn" onclick="load()">Retry</button></div>';}
 }
-function render(){
- const s=cache.stats||{}, users=cache.users||[];
- const active=Math.max(Number(s.active_users_7d||0),0), total=Number(s.total_users||0), completion=Number(s.habit_completions_7d||0), sessions=Number(s.study_sessions_7d||0), minutes=Number(s.study_minutes_7d||0), goals=Number(s.goals_created_7d||0);
- const activePct=total?Math.min(100,Math.round(active/total*100)):0;
- root.innerHTML=`
- <header class="admin-head"><div><div class="admin-brand">QuantumFlow • Private</div><h1>Admin Dashboard</h1><div class="muted">Your app's users, engagement and activity.</div></div><div class="toolbar"><button class="btn secondary" onclick="load()">↻ Refresh</button><a class="btn" href="./">Open App</a></div></header>
- <section class="stats">
-  <div class="card stat"><span class="muted">👥 Total users</span><strong>${total}</strong><small>All registered accounts</small></div>
-  <div class="card stat"><span class="muted">🆕 New · 7 days</span><strong>${Number(s.new_users_7d||0)}</strong><small>Recent signups</small></div>
-  <div class="card stat"><span class="muted">🟢 Active · 7 days</span><strong>${active}</strong><small>${activePct}% of users</small></div>
-  <div class="card stat"><span class="muted">✅ Habits · 7 days</span><strong>${completion}</strong><small>Completed check-ins</small></div>
-  <div class="card stat"><span class="muted">📚 Sessions · 7 days</span><strong>${sessions}</strong><small>Study sessions</small></div>
-  <div class="card stat"><span class="muted">⏱️ Study minutes</span><strong>${minutes}</strong><small>Last 7 days</small></div>
-  <div class="card stat"><span class="muted">🎯 Goals · 7 days</span><strong>${goals}</strong><small>Goals created</small></div>
- </section>
- <section class="section card panel"><div class="section-title"><div><h2>Engagement</h2><div class="muted">Last 7 days</div></div></div>
-  <div class="bar-row"><span>Active users</span><div class="bar"><i style="width:${activePct}%"></i></div><b>${activePct}%</b></div>
-  <div class="bar-row"><span>Habit activity</span><div class="bar"><i style="width:${Math.min(100,completion)}%"></i></div><b>${completion}</b></div>
-  <div class="bar-row"><span>Study sessions</span><div class="bar"><i style="width:${Math.min(100,sessions*10)}%"></i></div><b>${sessions}</b></div>
- </section>
- <section class="section card panel users"><div class="section-title"><div><h2>Registered accounts</h2><div class="muted">Private administrator view • ${users.length} shown</div></div></div>
-  <div class="table-wrap"><table><thead><tr><th>Account</th><th>Created</th><th>Last sign-in</th><th>Status</th></tr></thead><tbody>${users.length?users.map(u=>`<tr><td><span class="avatar">${initials(u.email)}</span><span class="email">${esc(u.email)}</span></td><td>${fmt(u.created_at)}</td><td>${fmt(u.last_sign_in_at)}</td><td><span class="status">${u.last_sign_in_at?'Active':'Not signed in'}</span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No accounts found.</td></tr>'}</tbody></table></div>
- </section>
- <div class="muted" style="text-align:center;margin-top:18px">QuantumFlow Admin • Refresh to view the latest data</div>`;
+async function refreshData(){
+ const [{data:stats,error:se},{data:users,error:ue},{data:activity,error:ae}]=await Promise.all([
+  supabaseClient.rpc('admin_stats'),supabaseClient.rpc('admin_user_list',{p_search:search||null}),supabaseClient.rpc('admin_daily_activity',{p_days:days})
+ ]);
+ if(se||ue||ae)throw new Error(se?.message||ue?.message||ae?.message||'Unable to load admin data');
+ cache={stats:stats?.[0]||{},users:users||[],activity:activity||[]};page=0;render();
 }
+function render(){
+ const s=cache.stats||{}, users=cache.users||[], a=cache.activity||[];
+ const total=Number(s.total_users||0),active=Number(s.active_users_7d||0),pct=total?Math.min(100,Math.round(active/total*100)):0;
+ root.innerHTML=`<header class="admin-head"><div><div class="admin-brand">QuantumFlow • Private</div><h1>Admin Dashboard</h1><div class="muted">Users, growth and app engagement.</div></div><div class="toolbar"><button class="btn secondary" onclick="refreshData()">↻ Refresh</button><a class="btn" href="./">Open App</a></div></header>
+ <section class="stats">
+  ${card('👥 Total users',total,'All registered accounts')}${card('🆕 New · 7 days',s.new_users_7d,'Recent signups')}${card('🟢 Active · 7 days',active,pct+'% of users')}${card('✅ Habits · 7 days',s.habit_completions_7d,'Completed check-ins')}${card('📚 Sessions · 7 days',s.study_sessions_7d,'Study sessions')}${card('⏱️ Study minutes',s.study_minutes_7d,'Last 7 days')}${card('🎯 Goals · 7 days',s.goals_created_7d,'Goals created')}</section>
+ <section class="section card panel"><div class="section-title"><div><h2>Activity analytics</h2><div class="muted">Daily activity across QuantumFlow</div></div><select class="select" id="days" onchange="changeDays(this.value)"><option value="7" ${days===7?'selected':''}>7 days</option><option value="14" ${days===14?'selected':''}>14 days</option><option value="30" ${days===30?'selected':''}>30 days</option><option value="90" ${days===90?'selected':''}>90 days</option></select></div><div class="chart-wrap"><canvas id="activityChart"></canvas></div></section>
+ <section class="section card panel users"><div class="section-title"><div><h2>Registered accounts</h2><div class="muted">Private administrator view • ${users.length} result${users.length===1?'':'s'}</div></div></div>
+ <div class="filters"><input id="userSearch" placeholder="Search by email…" value="${esc(search)}" onkeydown="if(event.key==='Enter')searchUsers()"><button class="btn" onclick="searchUsers()">Search</button>${search?'<button class="btn secondary" onclick="clearSearch()">Clear</button>':''}</div>
+ <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Account</th><th>Created</th><th>Last sign-in</th><th>Status</th></tr></thead><tbody>${renderUsers(users)}</tbody></table></div>
+ </section><div class="muted" style="text-align:center;margin-top:18px">QuantumFlow Admin • Data is restricted to administrators</div>`;
+ drawChart(a);
+}
+function card(label,value,note){return `<div class="card stat"><span class="muted">${label}</span><strong>${Number(value||0)}</strong><small>${esc(note)}</small></div>`}
+function renderUsers(users){return users.length?users.map(u=>`<tr><td><span class="avatar">${initials(u.email)}</span><span class="email">${esc(u.email)}</span></td><td>${fmt(u.created_at)}</td><td>${fmt(u.last_sign_in_at)}</td><td><span class="status">${u.last_sign_in_at?'Active':'Not signed in'}</span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No accounts match this search.</td></tr>'}
+function drawChart(a){if(chart)chart.destroy();const ctx=document.getElementById('activityChart');if(!ctx)return;const labels=a.map(x=>new Date(x.day+'T00:00:00').toLocaleDateString([], {month:'short',day:'numeric'}));chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'New users',data:a.map(x=>x.new_users),tension:.35},{label:'Active users',data:a.map(x=>x.active_users),tension:.35},{label:'Habit completions',data:a.map(x=>x.habit_completions),tension:.35},{label:'Study sessions',data:a.map(x=>x.study_sessions),tension:.35}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9aa6c5'}}},scales:{x:{ticks:{color:'#9aa6c5'},grid:{display:false}},y:{beginAtZero:true,ticks:{color:'#9aa6c5'},grid:{color:'rgba(255,255,255,.06)'}}}}});}
+async function changeDays(v){days=Number(v);try{const {data,error}=await supabaseClient.rpc('admin_daily_activity',{p_days:days});if(error)throw error;cache.activity=data||[];render();}catch(e){alert(e.message)}}
+async function searchUsers(){search=document.getElementById('userSearch').value.trim();try{const {data,error}=await supabaseClient.rpc('admin_user_list',{p_search:search||null});if(error)throw error;cache.users=data||[];render();}catch(e){alert(e.message)}}
+function clearSearch(){search='';refreshData()}
 load();
 </script>
 </body></html>
