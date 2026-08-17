@@ -1,41 +1,58 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b1020"><title>QuantumFlow Admin</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    body{min-height:100vh}.admin{max-width:1050px;margin:auto;padding:24px 16px 50px}.admin-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.admin-head h1{margin:0}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{padding:18px}.stat strong{display:block;font-size:28px;margin-top:8px}.users{overflow:auto}.users table{width:100%;border-collapse:collapse}.users th,.users td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.notice{padding:16px;border-radius:14px;margin:12px 0}.error{background:rgba(255,80,100,.1)}.ok{background:rgba(80,220,150,.1)}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020"><title>QuantumFlow • Admin</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.admin{max-width:1100px;margin:auto;padding:20px 16px 50px}.admin-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.admin-head h1{margin:4px 0}.admin-brand{font-size:13px;color:var(--primary);font-weight:800;letter-spacing:.12em;text-transform:uppercase}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px}.stat{padding:18px;position:relative;overflow:hidden}.stat strong{display:block;font-size:30px;margin-top:8px}.stat small{color:var(--muted)}.section{margin-top:16px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.section-title h2{margin:0}.panel{padding:18px}.table-wrap{overflow:auto}.users table{width:100%;border-collapse:collapse;min-width:620px}.users th,.users td{text-align:left;padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.users th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--card2);margin-right:8px;font-weight:800;color:var(--primary);vertical-align:middle}.email{font-weight:650}.status{display:inline-flex;align-items:center;gap:6px}.status:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green)}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.notice{padding:14px;border-radius:14px;margin:12px 0}.error{background:rgba(255,80,100,.1);border:1px solid rgba(255,80,100,.2)}.ok{background:rgba(80,220,150,.1);border:1px solid rgba(80,220,150,.2)}.loading{opacity:.65}.empty{text-align:center;padding:30px;color:var(--muted)}.bar-row{display:grid;grid-template-columns:110px 1fr 55px;align-items:center;gap:10px;margin:12px 0}.bar-row .bar{height:9px}.danger-text{color:var(--red)}@media(max-width:600px){.admin-head{align-items:flex-start}.admin-head .toolbar{justify-content:flex-end}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:25px}.bar-row{grid-template-columns:85px 1fr 45px;font-size:12px}}
+</style>
 </head>
 <body>
-<div class="admin" id="admin"><div class="card"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow admin access.</p></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
+<main class="admin" id="admin"><div class="card loading"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow administrator access.</p></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase.js"></script>
 <script>
 const root=document.getElementById('admin');
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const fmt=d=>d?new Date(d).toLocaleString(): 'Never';
+const fmt=d=>d?new Date(d).toLocaleString([], {dateStyle:'medium',timeStyle:'short'}):'Never';
+const initials=e=>(String(e||'?').trim()[0]||'?').toUpperCase();
+let cache={stats:null,users:[]};
 async function load(){
+ root.innerHTML='<div class="card loading"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow administrator access.</p></div>';
+ try{
   const {data:{session}}=await supabaseClient.auth.getSession();
-  if(!session){root.innerHTML='<div class="card"><h2>Admin sign-in required</h2><p class="muted">Sign in to QuantumFlow first, then open this page again.</p><a class="btn" href="./">Open QuantumFlow</a></div>';return;}
+  if(!session){root.innerHTML='<div class="card"><h2>🔐 Admin sign-in required</h2><p class="muted">Sign in to QuantumFlow first, then open this page again.</p><a class="btn" href="./">Open QuantumFlow</a></div>';return;}
   const {data:isAdmin,error:roleError}=await supabaseClient.rpc('is_quantumflow_admin');
-  if(roleError||!isAdmin){root.innerHTML='<div class="card"><h2>Access denied</h2><p class="muted">This account is not registered as a QuantumFlow administrator.</p><a class="btn secondary" href="./">Back to app</a></div>';return;}
+  if(roleError||!isAdmin){root.innerHTML='<div class="card"><h2>🚫 Access denied</h2><p class="muted">This account is not registered as a QuantumFlow administrator.</p><a class="btn secondary" href="./">Back to app</a></div>';return;}
   const [{data:stats,error:statsError},{data:users,error:usersError}]=await Promise.all([supabaseClient.rpc('admin_stats'),supabaseClient.rpc('admin_user_list')]);
-  if(statsError||usersError){root.innerHTML='<div class="card"><h2>Could not load admin data</h2><p class="muted">'+esc(statsError?.message||usersError?.message||'Unknown error')+'</p></div>';return;}
-  const s=stats?.[0]||{};
-  root.innerHTML=`<div class="admin-head"><div><div class="brand">QuantumFlow</div><h1>Admin Dashboard</h1><div class="muted">Private app usage overview</div></div><a class="btn secondary" href="./">Open app</a></div>
-  <div class="stats">
-    <div class="card stat"><span class="muted">Total users</span><strong>${s.total_users??0}</strong></div>
-    <div class="card stat"><span class="muted">New · 7 days</span><strong>${s.new_users_7d??0}</strong></div>
-    <div class="card stat"><span class="muted">Active · 7 days</span><strong>${s.active_users_7d??0}</strong></div>
-    <div class="card stat"><span class="muted">Habit completions</span><strong>${s.habit_completions_7d??0}</strong></div>
-    <div class="card stat"><span class="muted">Study sessions</span><strong>${s.study_sessions_7d??0}</strong></div>
-    <div class="card stat"><span class="muted">Study minutes</span><strong>${s.study_minutes_7d??0}</strong></div>
-    <div class="card stat"><span class="muted">Goals created</span><strong>${s.goals_created_7d??0}</strong></div>
-  </div>
-  <div class="card users" style="margin-top:16px"><div class="row between"><div><h2>Registered accounts</h2><div class="muted">Only visible to QuantumFlow administrators.</div></div><button class="btn secondary" onclick="load()">Refresh</button></div>
-  <table><thead><tr><th>Email</th><th>Created</th><th>Last sign-in</th></tr></thead><tbody>${(users||[]).map(u=>`<tr><td>${esc(u.email)}</td><td>${fmt(u.created_at)}</td><td>${fmt(u.last_sign_in_at)}</td></tr>`).join('')}</tbody></table></div>`;
+  if(statsError||usersError)throw new Error(statsError?.message||usersError?.message||'Unable to load admin data');
+  cache={stats:stats?.[0]||{},users:users||[]};render();
+ }catch(e){root.innerHTML='<div class="card"><h2>Could not load admin data</h2><div class="notice error">'+esc(e.message)+'</div><button class="btn" onclick="load()">Retry</button></div>';}
+}
+function render(){
+ const s=cache.stats||{}, users=cache.users||[];
+ const active=Math.max(Number(s.active_users_7d||0),0), total=Number(s.total_users||0), completion=Number(s.habit_completions_7d||0), sessions=Number(s.study_sessions_7d||0), minutes=Number(s.study_minutes_7d||0), goals=Number(s.goals_created_7d||0);
+ const activePct=total?Math.min(100,Math.round(active/total*100)):0;
+ root.innerHTML=`
+ <header class="admin-head"><div><div class="admin-brand">QuantumFlow • Private</div><h1>Admin Dashboard</h1><div class="muted">Your app's users, engagement and activity.</div></div><div class="toolbar"><button class="btn secondary" onclick="load()">↻ Refresh</button><a class="btn" href="./">Open App</a></div></header>
+ <section class="stats">
+  <div class="card stat"><span class="muted">👥 Total users</span><strong>${total}</strong><small>All registered accounts</small></div>
+  <div class="card stat"><span class="muted">🆕 New · 7 days</span><strong>${Number(s.new_users_7d||0)}</strong><small>Recent signups</small></div>
+  <div class="card stat"><span class="muted">🟢 Active · 7 days</span><strong>${active}</strong><small>${activePct}% of users</small></div>
+  <div class="card stat"><span class="muted">✅ Habits · 7 days</span><strong>${completion}</strong><small>Completed check-ins</small></div>
+  <div class="card stat"><span class="muted">📚 Sessions · 7 days</span><strong>${sessions}</strong><small>Study sessions</small></div>
+  <div class="card stat"><span class="muted">⏱️ Study minutes</span><strong>${minutes}</strong><small>Last 7 days</small></div>
+  <div class="card stat"><span class="muted">🎯 Goals · 7 days</span><strong>${goals}</strong><small>Goals created</small></div>
+ </section>
+ <section class="section card panel"><div class="section-title"><div><h2>Engagement</h2><div class="muted">Last 7 days</div></div></div>
+  <div class="bar-row"><span>Active users</span><div class="bar"><i style="width:${activePct}%"></i></div><b>${activePct}%</b></div>
+  <div class="bar-row"><span>Habit activity</span><div class="bar"><i style="width:${Math.min(100,completion)}%"></i></div><b>${completion}</b></div>
+  <div class="bar-row"><span>Study sessions</span><div class="bar"><i style="width:${Math.min(100,sessions*10)}%"></i></div><b>${sessions}</b></div>
+ </section>
+ <section class="section card panel users"><div class="section-title"><div><h2>Registered accounts</h2><div class="muted">Private administrator view • ${users.length} shown</div></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Account</th><th>Created</th><th>Last sign-in</th><th>Status</th></tr></thead><tbody>${users.length?users.map(u=>`<tr><td><span class="avatar">${initials(u.email)}</span><span class="email">${esc(u.email)}</span></td><td>${fmt(u.created_at)}</td><td>${fmt(u.last_sign_in_at)}</td><td><span class="status">${u.last_sign_in_at?'Active':'Not signed in'}</span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No accounts found.</td></tr>'}</tbody></table></div>
+ </section>
+ <div class="muted" style="text-align:center;margin-top:18px">QuantumFlow Admin • Refresh to view the latest data</div>`;
 }
 load();
 </script>
