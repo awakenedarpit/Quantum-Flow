@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1020"><title>QuantumFlow Admin</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body{min-height:100vh}.admin{max-width:1050px;margin:auto;padding:24px 16px 50px}.admin-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.admin-head h1{margin:0}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{padding:18px}.stat strong{display:block;font-size:28px;margin-top:8px}.users{overflow:auto}.users table{width:100%;border-collapse:collapse}.users th,.users td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.notice{padding:16px;border-radius:14px;margin:12px 0}.error{background:rgba(255,80,100,.1)}.ok{background:rgba(80,220,150,.1)}
+  </style>
+</head>
+<body>
+<div class="admin" id="admin"><div class="card"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow admin access.</p></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+const root=document.getElementById('admin');
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const fmt=d=>d?new Date(d).toLocaleString(): 'Never';
+async function load(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session){root.innerHTML='<div class="card"><h2>Admin sign-in required</h2><p class="muted">Sign in to QuantumFlow first, then open this page again.</p><a class="btn" href="./">Open QuantumFlow</a></div>';return;}
+  const {data:isAdmin,error:roleError}=await supabaseClient.rpc('is_quantumflow_admin');
+  if(roleError||!isAdmin){root.innerHTML='<div class="card"><h2>Access denied</h2><p class="muted">This account is not registered as a QuantumFlow administrator.</p><a class="btn secondary" href="./">Back to app</a></div>';return;}
+  const [{data:stats,error:statsError},{data:users,error:usersError}]=await Promise.all([supabaseClient.rpc('admin_stats'),supabaseClient.rpc('admin_user_list')]);
+  if(statsError||usersError){root.innerHTML='<div class="card"><h2>Could not load admin data</h2><p class="muted">'+esc(statsError?.message||usersError?.message||'Unknown error')+'</p></div>';return;}
+  const s=stats?.[0]||{};
+  root.innerHTML=`<div class="admin-head"><div><div class="brand">QuantumFlow</div><h1>Admin Dashboard</h1><div class="muted">Private app usage overview</div></div><a class="btn secondary" href="./">Open app</a></div>
+  <div class="stats">
+    <div class="card stat"><span class="muted">Total users</span><strong>${s.total_users??0}</strong></div>
+    <div class="card stat"><span class="muted">New · 7 days</span><strong>${s.new_users_7d??0}</strong></div>
+    <div class="card stat"><span class="muted">Active · 7 days</span><strong>${s.active_users_7d??0}</strong></div>
+    <div class="card stat"><span class="muted">Habit completions</span><strong>${s.habit_completions_7d??0}</strong></div>
+    <div class="card stat"><span class="muted">Study sessions</span><strong>${s.study_sessions_7d??0}</strong></div>
+    <div class="card stat"><span class="muted">Study minutes</span><strong>${s.study_minutes_7d??0}</strong></div>
+    <div class="card stat"><span class="muted">Goals created</span><strong>${s.goals_created_7d??0}</strong></div>
+  </div>
+  <div class="card users" style="margin-top:16px"><div class="row between"><div><h2>Registered accounts</h2><div class="muted">Only visible to QuantumFlow administrators.</div></div><button class="btn secondary" onclick="load()">Refresh</button></div>
+  <table><thead><tr><th>Email</th><th>Created</th><th>Last sign-in</th></tr></thead><tbody>${(users||[]).map(u=>`<tr><td>${esc(u.email)}</td><td>${fmt(u.created_at)}</td><td>${fmt(u.last_sign_in_at)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+load();
+</script>
+</body></html>
