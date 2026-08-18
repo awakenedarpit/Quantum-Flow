@@ -6,6 +6,7 @@
     const toast=m=>window.showToast(m);
     const esc=window.esc||((s)=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m])));
     const code=()=>Math.random().toString(36).slice(2,12).toUpperCase();
+    const mobile=()=>window.matchMedia('(max-width:650px)').matches;
     window.qfCreateGroup=()=>{
       const old=document.getElementById('qfCreateGroupModal'); if(old) old.remove();
       const modal=document.createElement('div'); modal.id='qfCreateGroupModal'; modal.className='qf-modal-backdrop';
@@ -31,6 +32,28 @@
         <button id="qfCgSubmit" class="btn qf-create-submit">Create Group <span>→</span></button>
       </div>`;
       document.body.appendChild(modal);
+      const panel=modal.querySelector('.qf-create-modal');
+      /* Mobile: the panel is the ONLY scroll surface. Do this in JS as well as CSS so
+         older cached/global styles cannot trap the swipe on the backdrop. */
+      if(mobile()){
+        document.body.dataset.qfCreateGroupScrollLock='1';
+        document.body.style.overflow='hidden';
+        document.body.style.touchAction='none';
+        modal.style.overflow='hidden';
+        panel.style.overflowY='auto'; panel.style.overflowX='hidden';
+        panel.style.webkitOverflowScrolling='touch'; panel.style.touchAction='pan-y';
+        panel.style.maxHeight='calc(100dvh - 16px)'; panel.style.height='calc(100dvh - 16px)';
+        panel.style.paddingBottom='calc(128px + env(safe-area-inset-bottom))';
+        panel.style.scrollPaddingBottom='calc(128px + env(safe-area-inset-bottom))';
+        modal.addEventListener('touchmove',e=>{if(!panel.contains(e.target))e.preventDefault()},{passive:false});
+      }
+      const restore=()=>{if(document.body.dataset.qfCreateGroupScrollLock){document.body.style.overflow='';document.body.style.touchAction='';delete document.body.dataset.qfCreateGroupScrollLock;}};
+      const observer=new MutationObserver(()=>{if(!document.body.contains(modal))restore();}); observer.observe(document.body,{childList:true});
+      modal.addEventListener('click',e=>{if(e.target===modal){modal.remove();restore();observer.disconnect();}});
+      const closeBtn=modal.querySelector('.qf-modal-close'); closeBtn.addEventListener('click',()=>{restore();observer.disconnect();});
+      panel.addEventListener('wheel',e=>{if(mobile())e.stopPropagation();},{passive:true});
+      panel.addEventListener('touchstart',()=>{}, {passive:true});
+      panel.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
       let visibility='public', mode='open';
       const name=modal.querySelector('#qfCgName'), desc=modal.querySelector('#qfCgDesc'), icon=modal.querySelector('#qfCgIcon');
       const update=()=>{modal.querySelector('#qfCgPreviewIcon').textContent=icon.value.trim()||'👥';modal.querySelector('#qfCgPreviewName').textContent=name.value.trim()||'Your group';modal.querySelector('#qfCgPreviewType').textContent=(visibility==='private'?'🔐 Private':'🌍 Public')+' · '+(mode==='invite'?'Invite only':mode==='approval'?'Approval':'Open');modal.querySelector('#qfCgCount').textContent=desc.value.length+' / 240';};
@@ -48,7 +71,7 @@
           if(g.error) throw g.error;
           const m=await client.from('group_members').insert({group_id:g.data.id,user_id:user.id,role:'owner',status:'active'});
           if(m.error){await client.from('groups').delete().eq('id',g.data.id).eq('owner_id',user.id);throw m.error;}
-          modal.remove();toast('✨ Your group is ready!');window.qfGroupSection='detail';window.qfOpenGroup(g.data.id);
+          restore();observer.disconnect();modal.remove();toast('✨ Your group is ready!');window.qfGroupSection='detail';window.qfOpenGroup(g.data.id);
         }catch(e){console.error(e);toast('❌ '+(e.message||'Unable to create group. Check your connection and permissions.'));btn.disabled=false;btn.innerHTML='Create Group <span>→</span>';}
       };
       update();setTimeout(()=>name.focus(),50);
