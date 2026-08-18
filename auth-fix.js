@@ -56,6 +56,7 @@
     });
     card.querySelector('#qfAuthSwitch').addEventListener('click', () => {
       mode = mode === 'signup' ? 'signin' : 'signup';
+      lastRoot = null;
       renderAuth();
     });
   }
