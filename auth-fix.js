@@ -1,4 +1,4 @@
-// QuantumFlow auth UX repair. app.js owns render() lexically, so this module repairs the rendered DOM.
+// QuantumFlow auth UX repair — Name + Email + Password are always visible.
 (() => {
   const WAIT_MS=65000; let lockedUntil=0, mode='signin';
   function repair(){
@@ -9,7 +9,7 @@
     const email=document.getElementById('email'),password=document.getElementById('password'); if(!email||!password)return;
     let name=document.getElementById('displayName');
     if(!name){name=document.createElement('input');name.id='displayName';name.className='input';name.type='text';name.autocomplete='name';name.placeholder='Your Name';password.parentNode.insertBefore(name,password)}
-    name.hidden=mode!=='signup'; name.required=mode==='signup';
+    name.hidden=false; name.required=mode==='signup';
     const actions=r.querySelector('.actions'); if(!actions)return;
     let submit=actions.querySelector('#qfAuthSubmit');
     if(!submit){submit=actions.querySelector('button'); if(submit)submit.id='qfAuthSubmit'}
