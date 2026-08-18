@@ -26,10 +26,7 @@
       #app .auth .qf-auth-robot{top:-145px}
       #app .auth .qf-auth-panel{position:relative;z-index:3}
       #app .auth .qf-auth-bubble{z-index:7}
-      @media(max-width:520px){
-        #app .auth .qf-auth-card{padding-top:76px}
-        #app .auth .qf-auth-robot{top:-136px}
-      }
+      @media(max-width:520px){#app .auth .qf-auth-card{padding-top:76px}#app .auth .qf-auth-robot{top:-136px}}
     `;
     document.head.appendChild(style);
   }
@@ -37,11 +34,7 @@
   function robotMarkup() {
     return `<div class="qf-auth-robot" data-qf-auth-robot aria-hidden="true">
       <div class="qf-auth-bubble">Quantum Flow</div>
-      <div class="qf-robot-wrap">
-        <span class="qf-robot-arm qf-arm-left"></span><span class="qf-robot-arm qf-arm-right"></span>
-        <div class="qf-robot-head"><div class="qf-robot-face"><i></i><i></i><b></b><em></em><em></em></div></div>
-        <div class="qf-robot-hands"><span></span><span></span></div>
-      </div>
+      <div class="qf-robot-wrap"><span class="qf-robot-arm qf-arm-left"></span><span class="qf-robot-arm qf-arm-right"></span><div class="qf-robot-head"><div class="qf-robot-face"><i></i><i></i><b></b><em></em><em></em></div></div><div class="qf-robot-hands"><span></span><span></span></div></div>
     </div>`;
   }
 
@@ -54,41 +47,40 @@
     if (!card) return;
     installAuthLayoutFix();
     card.classList.add('qf-auth-card');
-    card.innerHTML = `${robotMarkup()}
-      <div class="qf-auth-panel">
-        ${mode === 'signin' ? '<div class="qf-welcome">Welcome to Quantum Flow</div>' : ''}
-        <div class="qf-auth-title">Beep boop. ${mode === 'signup' ? 'New human detected!' : 'Who goes there?'}</div>
-        <div class="qf-auth-subtitle">${mode === 'signup' ? 'Create your QuantumFlow account and start building better days.' : 'Log in and keep your momentum going.'}</div>
-        <form id="qfAuthForm" class="qf-auth-form" novalidate>
-          ${mode === 'signup' ? field('displayName', 'text', 'Your name', 'name', 'user', 'required') : ''}
-          ${field('email', 'email', 'Your email', 'email', 'mail', 'required')}
-          ${field('password', 'password', 'Super secret password', 'current-password', 'lock', 'required minlength="6"')}
-          <button id="qfAuthSubmit" class="qf-auth-submit" type="submit"><span>⚡</span>${mode === 'signup' ? 'CREATE ACCOUNT' : 'LOG ME IN'}</button>
-        </form>
-        <p id="authStatus" class="qf-auth-status" aria-live="polite"></p>
-        <div class="qf-auth-switch">${mode === 'signup' ? 'Already have an account?' : "Don't have an account?"} <button id="qfAuthSwitch" type="button">${mode === 'signup' ? 'Sign in' : 'Create account'}</button></div>
-        <p class="qf-auth-note">Your account is secured with Supabase authentication.</p>
-      </div>`;
+    card.innerHTML = `${robotMarkup()}<div class="qf-auth-panel">
+      ${mode === 'signin' ? '<div class="qf-welcome">Welcome to Quantum Flow</div>' : ''}
+      <div class="qf-auth-title">Beep boop. ${mode === 'signup' ? 'New human detected!' : 'Who goes there?'}</div>
+      <div class="qf-auth-subtitle">${mode === 'signup' ? 'Create your QuantumFlow account and start building better days.' : 'Log in and keep your momentum going.'}</div>
+      <form id="qfAuthForm" class="qf-auth-form" novalidate>
+        ${mode === 'signup' ? field('displayName', 'text', 'Your name', 'name', 'user', '') : ''}
+        ${field('email', 'email', 'Your email', 'email', 'mail', 'required')}
+        ${field('password', 'password', 'Super secret password', 'current-password', 'lock', 'required minlength="6"')}
+        <button id="qfAuthSubmit" class="qf-auth-submit" type="submit"><span>⚡</span>${mode === 'signup' ? 'CREATE ACCOUNT' : 'LOG ME IN'}</button>
+      </form>
+      <p id="authStatus" class="qf-auth-status" aria-live="polite"></p>
+      <div class="qf-auth-switch">${mode === 'signup' ? 'Already have an account?' : "Don't have an account?"} <button id="qfAuthSwitch" type="button">${mode === 'signup' ? 'Sign in' : 'Create account'}</button></div>
+      <p class="qf-auth-note">Your account is secured with Supabase authentication.</p>
+    </div>`;
 
     const form = card.querySelector('#qfAuthForm');
+    const nameInput = card.querySelector('#displayName');
+    if (nameInput) {
+      // Some browsers visually autofill the field before its JS value is updated.
+      // Listen for autofill/input changes and explicitly keep the value available to submit.
+      ['input', 'change', 'blur'].forEach(type => nameInput.addEventListener(type, () => { nameInput.dataset.qfValue = nameInput.value; }));
+      requestAnimationFrame(() => { nameInput.dataset.qfValue = nameInput.value; });
+    }
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       if (mode === 'signup') window.signUp(); else window.signIn();
     });
-    card.querySelector('#qfAuthSwitch').addEventListener('click', () => {
-      mode = mode === 'signup' ? 'signin' : 'signup';
-      lastRoot = null;
-      renderAuth();
-    });
+    card.querySelector('#qfAuthSwitch').addEventListener('click', () => { mode = mode === 'signup' ? 'signin' : 'signup'; lastRoot = null; renderAuth(); });
   }
 
   function renderAuth() {
     const root = document.querySelector('#app .auth');
     if (!root) return;
-    if (root !== lastRoot || !root.querySelector('.qf-auth-card')) {
-      lastRoot = root;
-      build(root);
-    }
+    if (root !== lastRoot || !root.querySelector('.qf-auth-card')) { lastRoot = root; build(root); }
   }
 
   window.qfTogglePassword = function () {
@@ -102,7 +94,8 @@
   window.signUp = async function () {
     const now = Date.now();
     if (now < lockedUntil) return toast(`Please wait ${Math.ceil((lockedUntil - now) / 1000)}s before trying again.`);
-    const name = document.getElementById('displayName')?.value.trim() || '';
+    const nameInput = document.getElementById('displayName');
+    const name = String(nameInput?.value || nameInput?.dataset?.qfValue || '').trim();
     const email = document.getElementById('email')?.value.trim().toLowerCase() || '';
     const password = document.getElementById('password')?.value || '';
     const status = document.getElementById('authStatus');
@@ -112,31 +105,16 @@
     lockedUntil = now + WAIT_MS;
     if (status) status.textContent = 'Creating your account…';
     try {
-      const request = supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: location.origin + location.pathname,
-          data: { display_name: name, full_name: name, name }
-        }
-      });
-      const { data, error } = await Promise.race([
-        request,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out. Please check your internet connection.')), 10000))
-      ]);
+      const request = supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname, data: { display_name: name, full_name: name, name } } });
+      const { data, error } = await Promise.race([request, new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out. Please check your internet connection.')), 10000))]);
       if (error) {
         lockedUntil = 0;
         const message = String(error.message || '').toLowerCase();
-        const msg = error.status === 429 || message.includes('rate limit') || message.includes('rate_limit')
-          ? 'Email sending limit reached. Please wait and try again.'
-          : error.message;
+        const msg = error.status === 429 || message.includes('rate limit') || message.includes('rate_limit') ? 'Email sending limit reached. Please wait and try again.' : error.message;
         if (status) status.textContent = msg;
         return toast(msg);
       }
-      if (data?.session) {
-        lockedUntil = 0;
-        return bootstrap();
-      }
+      if (data?.session) { lockedUntil = 0; return bootstrap(); }
       if (status) status.textContent = 'Account created. Check your email ID to confirm your account.';
       toast('Account created ✓ Check your email');
     } catch (error) {
