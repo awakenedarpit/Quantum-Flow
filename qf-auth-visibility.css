@@ -1,9 +1,61 @@
-/* QuantumFlow auth-screen isolation. The auth module supplies the single robot element. */
+/* QuantumFlow auth screen — warm reference-inspired login/create-account UI. */
 body:has(#app .auth) #nav{display:none!important}
-body:has(#app .auth){padding-bottom:0!important}
+body:has(#app .auth){padding-bottom:0!important;background:#f4f0e8!important;color:#252525!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body:has(#app .auth):before{display:none!important}
 body:has(#app .auth) .qf-install{display:none!important}
-#app .auth .card.hero{position:relative;overflow:visible}
-#app .auth .qf-auth-robot{font-size:clamp(44px,12vw,72px);line-height:1;margin:0 auto 12px;text-align:center;filter:drop-shadow(0 8px 18px rgba(120,180,255,.25));animation:qfAuthRobotFloat 3.2s ease-in-out infinite}
-@keyframes qfAuthRobotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+#app .auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 18px 54px;position:relative;overflow:hidden}
+#app .auth:before,#app .auth:after{content:"";position:fixed;pointer-events:none;inset:0;background-image:radial-gradient(rgba(75,67,55,.10) .8px,transparent .8px);background-size:22px 22px;opacity:.48}
+#app .auth:after{background-size:5px 5px;opacity:.12}
+#app .auth .qf-auth-card{width:min(430px,100%);margin:78px 0 0;padding:0 30px 28px;border:1px solid #292929;border-radius:25px;background:rgba(255,253,248,.94);box-shadow:10px 12px 0 #252525,0 20px 45px rgba(43,38,31,.12);position:relative;overflow:visible;z-index:1}
+#app .auth .qf-auth-panel{position:relative;z-index:3}
+#app .auth .brand{display:none}
+#app .auth .qf-auth-title{font-size:25px;line-height:1.15;font-weight:850;letter-spacing:-.04em;color:#202020;margin:43px 0 7px}
+#app .auth .qf-auth-subtitle{font-size:13px;line-height:1.45;color:#777269;margin-bottom:18px;max-width:330px}
+#app .auth .qf-auth-form{display:grid;gap:11px}
+#app .auth .qf-auth-field{height:64px;display:flex;align-items:center;gap:10px;position:relative;border:2px solid #d7d2ca;border-radius:15px;background:#fffdf9;transition:border-color .18s,box-shadow .18s,transform .18s}
+#app .auth .qf-auth-field:focus-within{border-color:#272727;box-shadow:0 0 0 3px rgba(244,79,46,.13);transform:translateY(-1px)}
+#app .auth .qf-field-icon{width:43px;display:grid;place-items:center;color:#8c8982;flex:0 0 43px}
+#app .auth .qf-field-icon svg,#app .auth .qf-password-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#app .auth .qf-auth-field input{border:0!important;box-shadow:none!important;background:transparent!important;color:#292929!important;margin:0!important;padding:0 42px 0 0!important;height:100%;font-size:15px;outline:none!important;width:100%}
+#app .auth .qf-auth-field input::placeholder{color:#a09b93!important}
+#app .auth .qf-password-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);border:0;background:none;color:#8c8982;padding:6px;cursor:pointer}
+#app .auth .qf-auth-submit{width:100%;height:66px;margin-top:4px;border:2px solid #252525;border-radius:15px;background:#f04f31;color:#fff;font-weight:900;font-size:16px;letter-spacing:.05em;cursor:pointer;box-shadow:0 5px 0 #252525;transition:transform .16s,box-shadow .16s,filter .16s}
+#app .auth .qf-auth-submit span{font-size:22px;margin-right:8px;vertical-align:-2px}
+#app .auth .qf-auth-submit:hover{filter:brightness(1.04);transform:translateY(-1px);box-shadow:0 6px 0 #252525}
+#app .auth .qf-auth-submit:active{transform:translateY(3px);box-shadow:0 2px 0 #252525}
+#app .auth .qf-auth-status{min-height:20px;text-align:center;color:#6f6b65;font-size:12px;margin:11px 0 0}
+#app .auth .qf-auth-switch{text-align:center;color:#777269;font-size:13px;margin-top:8px}
+#app .auth .qf-auth-switch button{border:0;background:none;color:#202020;text-decoration:underline;font-weight:800;cursor:pointer;padding:2px 4px;font-size:inherit}
+#app .auth .qf-auth-note{text-align:center;color:#a09b93;font-size:10px;margin:12px 0 0}
+
+/* CSS-drawn robot matching the rounded black/white/orange reference character. */
+#app .auth .qf-auth-robot{position:absolute;z-index:5;left:50%;top:-108px;width:270px;height:190px;transform:translateX(-50%);animation:qfAuthFloat 3.2s ease-in-out infinite;pointer-events:none}
+#app .auth .qf-auth-bubble{position:absolute;left:50%;top:-10px;transform:translateX(-50%);white-space:nowrap;background:#fffdf9;border:2px solid #252525;border-radius:14px;padding:10px 17px;font-size:14px;font-weight:800;color:#282828;box-shadow:0 3px 0 #252525}
+#app .auth .qf-auth-bubble:after{content:"";position:absolute;left:50%;bottom:-10px;width:16px;height:16px;background:#fffdf9;border-right:2px solid #252525;border-bottom:2px solid #252525;transform:translateX(-50%) rotate(45deg)}
+#app .auth .qf-robot-wrap{position:absolute;left:50%;bottom:0;width:250px;height:145px;transform:translateX(-50%)}
+#app .auth .qf-robot-head{position:absolute;left:50%;bottom:8px;width:168px;height:146px;transform:translateX(-50%);border:3px solid #252525;border-radius:37px 37px 24px 24px;background:#fffdf9;box-shadow:0 6px 0 rgba(37,37,37,.08)}
+#app .auth .qf-robot-head:before,#app .auth .qf-robot-head:after{content:"";position:absolute;top:58px;width:20px;height:48px;border:3px solid #252525;background:#fffdf9;border-radius:12px}
+#app .auth .qf-robot-head:before{left:-17px}.qf-robot-head:after{right:-17px}
+#app .auth .qf-robot-face{position:absolute;left:20px;right:20px;top:28px;bottom:18px;border-radius:25px;background:#252525;overflow:hidden}
+#app .auth .qf-robot-face i{position:absolute;top:26px;width:30px;height:30px;border-radius:50%;background:#fffdf9}
+#app .auth .qf-robot-face i:first-child{left:28px}.qf-robot-face i:nth-child(2){right:28px}
+#app .auth .qf-robot-face b{position:absolute;left:50%;top:66px;width:25px;height:17px;transform:translateX(-50%);background:#fffdf9;border-radius:4px 4px 13px 13px}
+#app .auth .qf-robot-face em{position:absolute;top:72px;width:17px;height:8px;background:#ee5437;border-radius:50%;opacity:.95}
+#app .auth .qf-robot-face em:nth-of-type(1){left:15px}.qf-robot-face em:nth-of-type(2){right:15px}
+#app .auth .qf-robot-arm{position:absolute;bottom:31px;width:32px;height:66px;border:3px solid #252525;border-radius:16px;background:#fffdf9}
+#app .auth .qf-arm-left{left:13px;transform:rotate(6deg)}#app .auth .qf-arm-right{right:13px;transform:rotate(-6deg)}
+#app .auth .qf-robot-hands{position:absolute;left:35px;right:35px;bottom:0;height:40px;display:flex;justify-content:space-between;z-index:6}
+#app .auth .qf-robot-hands span{width:52px;height:30px;border:3px solid #252525;border-radius:12px;background:#fffdf9;position:relative}
+#app .auth .qf-robot-hands span:after{content:"";position:absolute;left:15px;top:4px;width:3px;height:19px;background:#252525;box-shadow:10px 0 #252525}
+@keyframes qfAuthFloat{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-7px)}}
+
+@media(max-width:520px){
+  #app .auth{padding:18px 14px 38px}
+  #app .auth .qf-auth-card{margin-top:86px;padding:0 20px 24px;box-shadow:7px 9px 0 #252525}
+  #app .auth .qf-auth-title{font-size:22px}
+  #app .auth .qf-auth-robot{transform:translateX(-50%) scale(.88);transform-origin:center bottom}
+  #app .auth .qf-auth-bubble{font-size:12px;padding:8px 13px}
+  #app .auth .qf-robot-wrap{transform:translateX(-50%) scale(.92);transform-origin:center bottom}
+}
 @media(prefers-reduced-motion:reduce){#app .auth .qf-auth-robot{animation:none}}
 #app .auth #displayName[hidden]{display:none!important}
