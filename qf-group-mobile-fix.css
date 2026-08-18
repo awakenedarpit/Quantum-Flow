@@ -1,0 +1,47 @@
+/* Quantum Flow — mobile create-group safe-area fix */
+@media (max-width:650px){
+  body{overflow-x:hidden}
+  /* Any group creation overlay/modal must have its own scroll container. */
+  .qf-group-modal,.qf-groups-modal,.group-modal,[class*="group-modal"],#groupModal,#createGroupModal{
+    box-sizing:border-box;
+    max-height:calc(100dvh - 16px);
+    height:auto;
+    overflow:hidden;
+    padding-bottom:0;
+  }
+  .qf-group-modal .modal-body,.qf-groups-modal .modal-body,.group-modal .modal-body,[class*="group-modal"] .modal-body,
+  .qf-group-modal form,.qf-groups-modal form,.group-modal form,[class*="group-modal"] form{
+    max-height:calc(100dvh - 150px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(92px + env(safe-area-inset-bottom));
+  }
+  /* Catch dynamically generated group-create panels. */
+  .group-create,.create-group,.create-group-form,[data-modal="create-group"],[data-modal*="group"]{
+    max-height:calc(100dvh - 16px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(100px + env(safe-area-inset-bottom));
+    scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom));
+  }
+  /* Never let the primary action sit underneath the fixed navigation. */
+  .group-create button[type="submit"],.create-group button[type="submit"],.create-group-form button[type="submit"],
+  [data-modal="create-group"] button[type="submit"],[data-modal*="group"] button[type="submit"]{
+    position:relative;
+    z-index:2;
+    margin-bottom:18px;
+    min-height:46px;
+  }
+  /* Fixed app navigation remains above content, but the form has enough scroll clearance. */
+  #nav{z-index:1000}
+  .qf-group-modal,#createGroupModal,.group-create,.create-group,.create-group-form{scroll-margin-bottom:calc(92px + env(safe-area-inset-bottom))}
+}
+@media (max-width:380px){
+  .qf-group-modal .modal-body,.qf-groups-modal .modal-body,.group-modal .modal-body,[class*="group-modal"] .modal-body,
+  .qf-group-modal form,.qf-groups-modal form,.group-modal form,[class*="group-modal"] form{
+    max-height:calc(100dvh - 132px);
+    padding-bottom:calc(104px + env(safe-area-inset-bottom));
+  }
+}
