@@ -1,5 +1,5 @@
 /* Quantum Flow — friendly emoji navigation and brand mark */
-.brand:before{content:"🤖";display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:11px;background:linear-gradient(135deg,#eef7ff,#f4edff);background-image:none!important;font-size:22px;line-height:1;box-shadow:0 7px 18px rgba(99,102,241,.18),inset 0 0 0 1px rgba(99,102,241,.14);transform:translateZ(0);transition:transform .35s cubic-bezier(.22,.8,.24,1),box-shadow .35s ease}
+.brand:before{content:"";display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:11px;background:linear-gradient(135deg,#eef7ff,#f4edff);background-image:url("icon.svg")!important;background-repeat:no-repeat;background-position:center;background-size:29px 29px;font-size:0;line-height:1;box-shadow:0 7px 18px rgba(99,102,241,.18),inset 0 0 0 1px rgba(99,102,241,.14);transform:translateZ(0);transition:transform .35s cubic-bezier(.22,.8,.24,1),box-shadow .35s ease}
 .brand:hover:before{transform:rotate(-5deg) scale(1.07)}
 .nav button b{font-size:0!important;line-height:1!important;display:block!important}
 .nav button b:before{display:inline-block;font-size:22px;line-height:1;transform:translateZ(0);transition:transform .25s cubic-bezier(.22,.8,.24,1),filter .25s ease}
@@ -7,5 +7,5 @@
 /* Home, Habits, Study, Progress, Rank, Goals, Community, Profile, Settings */
 .nav button:nth-child(1) b:before{content:"🏠"}.nav button:nth-child(2) b:before{content:"🌱"}.nav button:nth-child(3) b:before{content:"📚"}.nav button:nth-child(4) b:before{content:"📈"}.nav button:nth-child(5) b:before{content:"🏆"}.nav button:nth-child(6) b:before{content:"🎯"}.nav button:nth-child(7) b:before{content:"👥"}.nav button:nth-child(8) b:before{content:"👤"}.nav button:nth-child(9) b:before{content:"⚙️"}
 .nav button:nth-child(1) b:before{filter:drop-shadow(0 3px 5px rgba(79,124,255,.25))}.nav button:nth-child(2) b:before{filter:drop-shadow(0 3px 5px rgba(22,168,107,.25))}.nav button:nth-child(3) b:before{filter:drop-shadow(0 3px 5px rgba(245,158,11,.25))}.nav button:nth-child(4) b:before{filter:drop-shadow(0 3px 5px rgba(139,92,246,.25))}.nav button:nth-child(5) b:before{filter:drop-shadow(0 3px 5px rgba(236,72,153,.25))}
-@media(max-width:650px){.brand:before{width:30px;height:30px;flex-basis:30px;border-radius:10px;font-size:20px}.nav button b:before{font-size:21px}}
+@media(max-width:650px){.brand:before{width:30px;height:30px;flex-basis:30px;border-radius:10px;background-size:25px 25px;font-size:0}.nav button b:before{font-size:21px}}
 @media(prefers-reduced-motion:reduce){.brand:before,.nav button b:before{transition:none}}
