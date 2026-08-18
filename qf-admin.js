@@ -1,5 +1,9 @@
 /* Quantum Flow Admin — secure user detail viewer. */
-(()=>{'use strict';const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));const client=()=>window.supabaseClient;const fmt=d=>d?new Date(d).toLocaleDateString([], {year:'numeric',month:'short',day:'numeric'}):'—';const initials=s=>(String(s||'?').trim()[0]||'?').toUpperCase();
+(()=>{'use strict';
+const client=()=>window.qfSupabaseClient||window.supabaseClient||(window.supabase?.createClient?null:null);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const fmt=d=>d?new Date(d).toLocaleDateString([], {year:'numeric',month:'short',day:'numeric'}):'—';
+const initials=s=>(String(s||'?').trim()[0]||'?').toUpperCase();
 async function view(id){
  if(!id)return;
  document.getElementById('qfAdminUserModal')?.remove();
@@ -7,8 +11,12 @@ async function view(id){
  modal.innerHTML='<div class="admin-user-dialog"><div class="admin-user-head"><div class="admin-user-title"><div class="admin-user-avatar">…</div><div><div class="muted">USER INTELLIGENCE</div><h2 style="margin:3px 0">Loading profile…</h2></div></div><button class="admin-user-close" aria-label="Close">×</button></div><div class="admin-user-body"><div class="admin-loading">Loading habits, goals, targets and milestones…</div></div></div>';
  document.body.appendChild(modal);modal.querySelector('.admin-user-close').onclick=()=>modal.remove();modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
  try{
-  const {data,error}=await client().rpc('admin_user_detail',{p_user_id:id});if(error)throw error;
-  const p=data?.profile||{},goals=Array.isArray(data?.goals)?data.goals:[],habits=Array.isArray(data?.habits)?data.habits:[],name=p.display_name||p.email?.split('@')[0]||'Quantum User';
+  const sb=client();
+  if(!sb) throw new Error('Supabase client is not available. Please refresh the admin page.');
+  const {data,error}=await sb.rpc('admin_user_detail',{p_user_id:id});
+  if(error)throw error;
+  const payload=Array.isArray(data)?(data[0]||{}):(data||{});
+  const p=payload.profile||{},goals=Array.isArray(payload.goals)?payload.goals:[],habits=Array.isArray(payload.habits)?payload.habits:[],name=p.display_name||p.email?.split('@')[0]||'Quantum User';
   modal.querySelector('.admin-user-avatar').textContent=initials(name);modal.querySelector('.admin-user-title h2').textContent=name;modal.querySelector('.admin-user-title .muted').textContent=p.email||'Private account';
   const active=habits.filter(h=>h.is_active).length,completedGoals=goals.filter(g=>g.is_completed||Number(g.progress)>=100).length,milestones=goals.reduce((n,g)=>n+(Array.isArray(g.milestones)?g.milestones.length:0),0),completedMilestones=goals.reduce((n,g)=>n+(Array.isArray(g.milestones)?g.milestones.filter(m=>m.is_completed).length:0),0),habitTarget=habits.reduce((n,h)=>n+Number(h.target_per_week||0),0);
   const goalHtml=goals.length?goals.map(g=>{const pct=Math.max(0,Math.min(100,Number(g.progress)||0)),ms=Array.isArray(g.milestones)?g.milestones:[],doneMs=ms.filter(m=>m.is_completed).length;return `<article class="admin-goal"><div class="admin-goal-top"><div><h4>🎯 ${esc(g.title||'Untitled goal')}</h4><div class="muted">${esc(g.description||'No description')} ${g.deadline?`• Due ${fmt(g.deadline)}`:''}</div></div><b>${pct}%</b></div><div class="admin-target-row"><span>Target</span><strong>100%</strong><span>Current</span><strong>${pct}%</strong></div><div class="admin-progress"><i style="width:${pct}%"></i></div>${ms.length?`<div class="admin-milestones-head"><span>Milestones</span><b>${doneMs}/${ms.length}</b></div><div class="admin-milestones">${ms.map(m=>`<div class="admin-milestone"><span class="admin-milestone-dot ${m.is_completed?'done':''}">${m.is_completed?'✓':''}</span><span>${esc(m.title||'Milestone')}</span><span class="admin-milestone-status">${m.is_completed?'Completed':'Pending'}</span></div>`).join('')}</div>`:'<div class="muted small">No milestones added.</div>'}</article>`}).join(''):'<div class="admin-empty">🎯 This user has not created any goals.</div>';
