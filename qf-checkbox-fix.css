@@ -1,14 +1,71 @@
-/* Quantum Flow — checkbox rendering hardening */
-/* The habit row owns its check control; suppress any leaked label/text or pseudo-content. */
+/* Quantum Flow — premium vibrant checkbox rendering */
+/* Keep the control compact, highly visible, and perfectly centered. */
 .qf-habit-row{font-size:0!important}
-.qf-habit-row > .check{font-size:0!important;line-height:0!important;text-indent:0!important;overflow:hidden!important;position:relative!important;display:inline-grid!important;place-items:center!important;flex:0 0 28px!important}
+.qf-habit-row > .check{
+  box-sizing:border-box!important;
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  flex:0 0 38px!important;
+  margin:0 10px 0 0!important;
+  padding:0!important;
+  border:2px solid rgba(99,102,241,.28)!important;
+  border-radius:12px!important;
+  background:linear-gradient(145deg,#ffffff,#eef2ff)!important;
+  color:transparent!important;
+  font-size:0!important;
+  line-height:0!important;
+  text-indent:0!important;
+  overflow:hidden!important;
+  position:relative!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  align-items:center!important;
+  justify-items:center!important;
+  vertical-align:middle!important;
+  box-shadow:0 5px 14px rgba(79,70,229,.14),inset 0 1px 0 rgba(255,255,255,.9)!important;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+.qf-habit-row > .check:hover{transform:translateY(-1px) scale(1.03)!important;box-shadow:0 8px 20px rgba(79,70,229,.24)!important;border-color:rgba(99,102,241,.55)!important}
+.qf-habit-row > .check:active{transform:scale(.94)!important}
 .qf-habit-row > .check::before{content:none!important;display:none!important}
-.qf-habit-row > .check::after{content:"";display:none!important;text-indent:0!important}
-.qf-habit-row > .check.done::after{content:"✓";display:block!important;font-size:15px!important;line-height:1!important;font-weight:900!important;color:#fff!important;text-indent:0!important}
+.qf-habit-row > .check::after{content:""!important;display:none!important}
+.qf-habit-row > .check.done{
+  background:linear-gradient(135deg,#06b6d4 0%,#2563eb 48%,#7c3aed 100%)!important;
+  border-color:rgba(255,255,255,.5)!important;
+  box-shadow:0 7px 22px rgba(79,70,229,.34),0 0 0 3px rgba(99,102,241,.10)!important;
+}
+.qf-habit-row > .check.done::after{
+  content:"✓"!important;
+  display:grid!important;
+  place-items:center!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  font-family:Arial,sans-serif!important;
+  font-size:21px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  color:#fff!important;
+  text-align:center!important;
+  text-indent:0!important;
+  transform:none!important;
+}
 .qf-habit-row > .grow{font-size:15px!important;min-width:0!important}
 .qf-habit-row > .grow b{font-size:15px!important}
 .qf-habit-row > .grow .muted{font-size:13px!important}
 .qf-habit-row > .pill{font-size:11px!important}
 /* Remove accidental standalone check labels/elements inserted beside the real control. */
-.qf-habit-row > :not(.check):not(.grow):not(.pill){font-size:0!important;line-height:0!important;max-width:0!important;min-width:0!important;width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;display:none!important}
+.qf-habit-row > :not(.check):not(.grow):not(.pill){font-size:0!important;line-height:0!important;max-width:0!important;min-width:0!important;width:0!important;height:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;display:none!important}
 .qf-habit-row > .check + .check{display:none!important}
+/* Dark theme remains vibrant and readable. */
+html[data-theme=dark] .qf-habit-row > .check{background:linear-gradient(145deg,#172554,#1e293b)!important;border-color:rgba(129,140,248,.45)!important;box-shadow:0 5px 16px rgba(0,0,0,.28)!important}
+html[data-theme=dark] .qf-habit-row > .check.done{background:linear-gradient(135deg,#0891b2,#2563eb 48%,#8b5cf6)!important;border-color:rgba(255,255,255,.35)!important;box-shadow:0 7px 22px rgba(37,99,235,.38)!important}
+@media(max-width:650px){
+  .qf-habit-row > .check{width:40px!important;height:40px!important;min-width:40px!important;flex-basis:40px!important;border-radius:13px!important;margin-right:11px!important}
+  .qf-habit-row > .check.done::after{font-size:22px!important}
+}
