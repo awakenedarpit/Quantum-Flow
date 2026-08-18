@@ -1,0 +1,14 @@
+/* Quantum Flow — checkbox rendering hardening */
+/* The habit row owns its check control; suppress any leaked label/text or pseudo-content. */
+.qf-habit-row{font-size:0!important}
+.qf-habit-row > .check{font-size:0!important;line-height:0!important;text-indent:0!important;overflow:hidden!important;position:relative!important;display:inline-grid!important;place-items:center!important;flex:0 0 28px!important}
+.qf-habit-row > .check::before{content:none!important;display:none!important}
+.qf-habit-row > .check::after{content:"";display:none!important;text-indent:0!important}
+.qf-habit-row > .check.done::after{content:"✓";display:block!important;font-size:15px!important;line-height:1!important;font-weight:900!important;color:#fff!important;text-indent:0!important}
+.qf-habit-row > .grow{font-size:15px!important;min-width:0!important}
+.qf-habit-row > .grow b{font-size:15px!important}
+.qf-habit-row > .grow .muted{font-size:13px!important}
+.qf-habit-row > .pill{font-size:11px!important}
+/* Remove accidental standalone check labels/elements inserted beside the real control. */
+.qf-habit-row > :not(.check):not(.grow):not(.pill){font-size:0!important;line-height:0!important;max-width:0!important;min-width:0!important;width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;display:none!important}
+.qf-habit-row > .check + .check{display:none!important}
