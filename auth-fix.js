@@ -21,7 +21,7 @@
     style.id = 'qf-auth-layout-fix';
     style.textContent = `
       #app .auth .qf-auth-card{padding-top:82px}
-      #app .auth .qf-welcome{font-size:14px;line-height:1.2;font-weight:900;letter-spacing:.02em;color:#f04f31;margin:0 0 8px}
+      #app .auth .qf-welcome{font-size:14px;line-height:1.2;font-weight:900;letter-spacing:.02em;color:var(--primary);margin:0 0 8px}
       #app .auth .qf-auth-title{margin:0 0 7px}
       #app .auth .qf-auth-robot{top:-145px}
       #app .auth .qf-auth-panel{position:relative;z-index:3}
@@ -36,7 +36,7 @@
 
   function robotMarkup() {
     return `<div class="qf-auth-robot" data-qf-auth-robot aria-hidden="true">
-      <div class="qf-auth-bubble">This is my favorite part.</div>
+      <div class="qf-auth-bubble">Quantum Flow</div>
       <div class="qf-robot-wrap">
         <span class="qf-robot-arm qf-arm-left"></span><span class="qf-robot-arm qf-arm-right"></span>
         <div class="qf-robot-head"><div class="qf-robot-face"><i></i><i></i><b></b><em></em><em></em></div></div>
