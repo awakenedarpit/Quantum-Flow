@@ -5,13 +5,15 @@
       const check = row.querySelector(':scope > .check');
       const grow = row.querySelector(':scope > .grow');
       if (!check || !grow) return;
+      row.classList.add('qf-habit-row');
 
       /* Remove accidental standalone text/label nodes between the control and content.
          Never touch the habit name/content inside .grow. */
       [...row.childNodes].forEach(node => {
         if (node === check || node === grow || node.nodeType === Node.COMMENT_NODE) return;
         if (node.nodeType === Node.TEXT_NODE) {
-          if (node.textContent.trim().toLowerCase() === 'check' || node.textContent.trim().toLowerCase() === 'checked') node.remove();
+          const text = node.textContent.trim().toLowerCase();
+          if (text === 'check' || text === 'checked') node.remove();
           return;
         }
         if (node.nodeType === Node.ELEMENT_NODE && !node.matches('.pill')) {
@@ -20,7 +22,6 @@
         }
       });
 
-      /* Ensure the real control has no accidental accessible/visual label text. */
       check.setAttribute('aria-label', check.classList.contains('done') ? 'Mark habit incomplete' : 'Mark habit complete');
       check.setAttribute('type', 'button');
     });
