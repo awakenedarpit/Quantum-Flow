@@ -1,30 +1,9 @@
-/* QuantumFlow auth-screen isolation + initial robot */
-/* The navigation lives outside #app, so hide it whenever the auth view is active. */
+/* QuantumFlow auth-screen isolation. The auth module supplies the single robot element. */
 body:has(#app .auth) #nav{display:none!important}
 body:has(#app .auth){padding-bottom:0!important}
 body:has(#app .auth) .qf-install{display:none!important}
-
-/* Render the robot in CSS as a guaranteed first-paint fallback. */
-#app .auth .card.hero{position:relative;padding-top:118px;overflow:visible}
-#app .auth .card.hero:before{
-  content:'🤖';
-  position:absolute;
-  top:18px;
-  left:50%;
-  transform:translateX(-50%);
-  width:82px;
-  height:82px;
-  display:grid;
-  place-items:center;
-  border-radius:26px;
-  font-size:50px;
-  line-height:1;
-  background:linear-gradient(145deg,rgba(99,102,241,.24),rgba(34,211,238,.14));
-  border:1px solid rgba(125,211,252,.3);
-  box-shadow:0 12px 40px rgba(0,0,0,.2),0 0 28px rgba(34,211,238,.12);
-  animation:qfAuthRobotFloat 3s ease-in-out infinite;
-  z-index:2;
-}
-@keyframes qfAuthRobotFloat{0%,100%{margin-top:0}50%{margin-top:-6px}}
-@media(max-width:650px){#app .auth .card.hero{padding-top:112px}}
-@media(prefers-reduced-motion:reduce){#app .auth .card.hero:before{animation:none}}
+#app .auth .card.hero{position:relative;overflow:visible}
+#app .auth .qf-auth-robot{font-size:clamp(44px,12vw,72px);line-height:1;margin:0 auto 12px;text-align:center;filter:drop-shadow(0 8px 18px rgba(120,180,255,.25));animation:qfAuthRobotFloat 3.2s ease-in-out infinite}
+@keyframes qfAuthRobotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:reduce){#app .auth .qf-auth-robot{animation:none}}
+#app .auth #displayName[hidden]{display:none!important}
