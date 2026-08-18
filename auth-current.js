@@ -1,4 +1,4 @@
-// Quantum Flow current auth UI. This file intentionally replaces all legacy auth UI handlers.
+// Quantum Flow current auth UI — single, clearly visible robot above the auth card.
 (() => {
   const WAIT_MS = 65000;
   let lockedUntil = 0;
@@ -8,10 +8,28 @@
   const setTheme=()=>{const s=localStorage.getItem('qf-theme');document.documentElement.setAttribute('data-theme',s==='dark'?'dark':'light')};
   const toggleTheme=()=>{const n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;localStorage.setItem('qf-theme',n);const b=document.getElementById('qfThemeToggle');if(b)b.textContent=n==='dark'?'☀️ Light':'🌙 Dark'};
   setTheme();
-  function layout(){if(document.getElementById('qf-auth-layout-fix'))return;const s=document.createElement('style');s.id='qf-auth-layout-fix';s.textContent='#app .auth .qf-auth-card{padding-top:82px;position:relative}#app .auth .qf-auth-panel{position:relative;z-index:3}#app .auth .qf-auth-bubble{z-index:7}';document.head.appendChild(s)}
-  const robot=()=>'<div class="qf-auth-robot" aria-hidden="true"><div class="qf-auth-bubble">Quantum Flow</div><div class="qf-robot-wrap"><div class="qf-robot-head"><div class="qf-robot-face"><i></i><i></i><b></b><em></em><em></em></div></div></div></div>';
+
+  function layout(){
+    if(document.getElementById('qf-auth-layout-fix'))return;
+    const s=document.createElement('style');s.id='qf-auth-layout-fix';
+    s.textContent='#app .auth .qf-auth-card{position:relative;overflow:visible!important}#app .auth .qf-auth-panel{position:relative;z-index:10}#app .auth .qf-auth-robot{pointer-events:none}#app .auth .qf-auth-robot img{display:block!important;visibility:visible!important;opacity:1!important}';
+    document.head.appendChild(s);
+  }
+
+  const robot=()=>'<div class="qf-auth-robot" aria-hidden="true"><div class="qf-auth-bubble">🤖 Quantum Flow</div><img src="icon.svg" alt="" class="qf-auth-robot-image"><div class="qf-auth-robot-glow"></div></div>';
   const field=(id,type,placeholder,autocomplete,ico)=>`<label class="qf-auth-field" for="${id}"><span class="qf-field-icon">${icon(ico)}</span><input id="${id}" class="input" type="${type}" autocomplete="${autocomplete}" placeholder="${placeholder}" required>${id==='password'?`<button class="qf-password-toggle" type="button" aria-label="Show password" onclick="qfTogglePassword()">${icon('eye')}</button>`:''}</label>`;
-  function build(root){const card=root.querySelector('.card.hero');if(!card)return;layout();const dark=document.documentElement.dataset.theme==='dark';card.classList.add('qf-auth-card');card.innerHTML=`<button id="qfThemeToggle" class="qf-auth-theme-toggle" type="button">${dark?'☀️ Light':'🌙 Dark'}</button>${robot()}<div class="qf-auth-panel">${mode==='signin'?'<div class="qf-welcome">Welcome to Quantum Flow</div>':''}<div class="qf-auth-title">Beep boop. ${mode==='signup'?'New human detected!':'Who goes there?'}</div><div class="qf-auth-subtitle">${mode==='signup'?'Create your Quantum Flow account and start building better days.':'Log in and keep your momentum going.'}</div><form id="qfAuthForm" class="qf-auth-form" novalidate>${field('email','email','Your email','email','mail')}${field('password','password','Super secret password','current-password','lock')}<button class="qf-auth-submit" type="submit"><span>⚡</span>${mode==='signup'?'CREATE ACCOUNT':'LOG ME IN'}</button></form><p id="authStatus" class="qf-auth-status" aria-live="polite"></p><div class="qf-auth-switch">${mode==='signup'?'Already have an account?':"Don't have an account?"} <button id="qfAuthSwitch" type="button">${mode==='signup'?'Sign in':'Create account'}</button></div><p class="qf-auth-note">Your account is secured with Supabase authentication.</p></div>`;card.querySelector('#qfThemeToggle').onclick=toggleTheme;card.querySelector('#qfAuthForm').addEventListener('submit',e=>{e.preventDefault();mode==='signup'?window.qfCreateAccount():window.qfLogin()});card.querySelector('#qfAuthSwitch').onclick=()=>{mode=mode==='signup'?'signin':'signup';lastRoot=null;render()}}
+
+  function build(root){
+    const card=root.querySelector('.card.hero');if(!card)return;
+    layout();
+    const dark=document.documentElement.dataset.theme==='dark';
+    card.classList.add('qf-auth-card');
+    card.innerHTML=`<button id="qfThemeToggle" class="qf-auth-theme-toggle" type="button">${dark?'☀️ Light':'🌙 Dark'}</button>${robot()}<div class="qf-auth-panel">${mode==='signin'?'<div class="qf-welcome">Welcome to Quantum Flow</div>':''}<div class="qf-auth-title">Beep boop. ${mode==='signup'?'New human detected!':'Who goes there?'}</div><div class="qf-auth-subtitle">${mode==='signup'?'Create your Quantum Flow account and start building better days.':'Log in and keep your momentum going.'}</div><form id="qfAuthForm" class="qf-auth-form" novalidate>${field('email','email','Your email','email','mail')}${field('password','password','Super secret password','current-password','lock')}<button class="qf-auth-submit" type="submit"><span>⚡</span>${mode==='signup'?'CREATE ACCOUNT':'LOG ME IN'}</button></form><p id="authStatus" class="qf-auth-status" aria-live="polite"></p><div class="qf-auth-switch">${mode==='signup'?'Already have an account?':"Don't have an account?"} <button id="qfAuthSwitch" type="button">${mode==='signup'?'Sign in':'Create account'}</button></div><p class="qf-auth-note">Your account is secured with Supabase authentication.</p></div>`;
+    card.querySelector('#qfThemeToggle').onclick=toggleTheme;
+    card.querySelector('#qfAuthForm').addEventListener('submit',e=>{e.preventDefault();mode==='signup'?window.qfCreateAccount():window.qfLogin()});
+    card.querySelector('#qfAuthSwitch').onclick=()=>{mode=mode==='signup'?'signin':'signup';lastRoot=null;render()};
+  }
+
   function render(){const root=document.querySelector('#app .auth');if(!root)return;if(root!==lastRoot||!root.querySelector('.qf-auth-card')){lastRoot=root;build(root)}}
   const normalizeEmail=e=>String(e||'').trim().toLowerCase();
   const validateEmail=e=>{const value=normalizeEmail(e);if(!value||value.length>254)return 'Enter a valid email address.';if(/[\s,;<>()[\]\\"']/u.test(value))return 'Enter a valid email address.';const parts=value.split('@');if(parts.length!==2)return 'Enter a valid email address.';const [local,domain]=parts;if(!local||local.length>64||local.startsWith('.')||local.endsWith('.')||local.includes('..'))return 'Enter a valid email address.';if(!/^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+$/i.test(local))return 'Enter a valid email address.';if(!domain||domain.length>253||domain.startsWith('.')||domain.endsWith('.')||domain.includes('..'))return 'Enter a valid email address.';const labels=domain.split('.');if(labels.length<2||labels.some(x=>!x||x.length>63||x.startsWith('-')||x.endsWith('-')||!/^[a-z0-9-]+$/i.test(x)))return 'Enter a valid email address.';const tld=labels.at(-1);if(tld.length<2||/^\d+$/.test(tld))return 'Enter a valid email address.';const blocked=['example.com','example.org','example.net','invalid','localhost','test','test.com','example'];if(blocked.includes(domain)||blocked.some(x=>domain.endsWith('.'+x)))return 'Please use a real email address, not a placeholder/test address.';return '';};
