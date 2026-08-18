@@ -15,6 +15,25 @@
     return icons[name] || '';
   };
 
+  function installAuthLayoutFix() {
+    if (document.getElementById('qf-auth-layout-fix')) return;
+    const style = document.createElement('style');
+    style.id = 'qf-auth-layout-fix';
+    style.textContent = `
+      #app .auth .qf-auth-card{padding-top:82px}
+      #app .auth .qf-welcome{font-size:14px;line-height:1.2;font-weight:900;letter-spacing:.02em;color:#f04f31;margin:0 0 8px}
+      #app .auth .qf-auth-title{margin:0 0 7px}
+      #app .auth .qf-auth-robot{top:-145px}
+      #app .auth .qf-auth-panel{position:relative;z-index:3}
+      #app .auth .qf-auth-bubble{z-index:7}
+      @media(max-width:520px){
+        #app .auth .qf-auth-card{padding-top:76px}
+        #app .auth .qf-auth-robot{top:-136px}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function robotMarkup() {
     return `<div class="qf-auth-robot" data-qf-auth-robot aria-hidden="true">
       <div class="qf-auth-bubble">This is my favorite part.</div>
@@ -33,9 +52,11 @@
   function build(root) {
     const card = root.querySelector('.card.hero');
     if (!card) return;
+    installAuthLayoutFix();
     card.classList.add('qf-auth-card');
     card.innerHTML = `${robotMarkup()}
       <div class="qf-auth-panel">
+        ${mode === 'signin' ? '<div class="qf-welcome">Welcome to Quantum Flow</div>' : ''}
         <div class="qf-auth-title">Beep boop. ${mode === 'signup' ? 'New human detected!' : 'Who goes there?'}</div>
         <div class="qf-auth-subtitle">${mode === 'signup' ? 'Create your QuantumFlow account and start building better days.' : 'Log in and keep your momentum going.'}</div>
         <form id="qfAuthForm" class="qf-auth-form" novalidate>
@@ -91,7 +112,7 @@
     lockedUntil = now + WAIT_MS;
     if (status) status.textContent = 'Creating your account…';
     try {
-      const { data, error } = await supabaseClient.auth.signUp({
+      const request = supabaseClient.auth.signUp({
         email,
         password,
         options: {
@@ -99,6 +120,10 @@
           data: { display_name: name, full_name: name, name }
         }
       });
+      const { data, error } = await Promise.race([
+        request,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out. Please check your internet connection.')), 10000))
+      ]);
       if (error) {
         lockedUntil = 0;
         const message = String(error.message || '').toLowerCase();
@@ -116,7 +141,9 @@
       toast('Account created ✓ Check your email');
     } catch (error) {
       lockedUntil = 0;
-      toast(error?.message || 'Could not create the account.');
+      const msg = error?.message || 'Could not create the account.';
+      if (status) status.textContent = msg;
+      toast(msg);
     }
   };
 
