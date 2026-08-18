@@ -1,4 +1,6 @@
-/* QuantumFlow runtime bridge: reliable admin navigation + auth UX restoration. */
+/* QuantumFlow runtime bridge: auth UI + admin navigation.
+ * Keeps the auth screen isolated from the app shell and ensures exactly one robot.
+ */
 (function(){
   let adminState=false;
   const expose=()=>{
@@ -12,7 +14,16 @@
     window.qfRuntimeReady=true;
     initAdminNav();
     syncAuthChrome();
+    ensureAuthRobot();
+    observeAuthScreen();
   };
+
+  function isAuthScreen(){
+    const nav=document.getElementById('nav');
+    const app=document.getElementById('app');
+    const auth=document.getElementById('authScreen')||document.querySelector('[id*=auth i]');
+    return !!auth && !window.currentUser && (!app || app.offsetParent===null || !app.children.length);
+  }
 
   function syncAuthChrome(){
     const nav=document.getElementById('nav');
@@ -22,10 +33,47 @@
     }
     if(window.currentUser){
       refreshAdminNav();
+      removeAuthRobots();
     }else{
       adminState=false;
       removeAdminButton();
+      ensureAuthRobot();
     }
+  }
+
+  function removeAuthRobots(){
+    document.querySelectorAll('[data-qf-auth-robot]').forEach(el=>el.remove());
+  }
+
+  function ensureAuthRobot(){
+    if(window.currentUser) return;
+    const auth=document.getElementById('authScreen')||document.querySelector('[id*=auth i]');
+    if(!auth) return;
+    const existing=auth.querySelectorAll('[data-qf-auth-robot]');
+    existing.forEach((el,i)=>{if(i>0)el.remove();});
+    if(existing.length) return;
+    const robot=document.createElement('div');
+    robot.dataset.qfAuthRobot='true';
+    robot.setAttribute('aria-hidden','true');
+    robot.textContent='🤖';
+    robot.style.cssText='font-size:clamp(42px,12vw,72px);line-height:1;margin:0 auto 12px;text-align:center;filter:drop-shadow(0 8px 18px rgba(120,180,255,.25));animation:qfRobotFloat 3.2s ease-in-out infinite;';
+    if(!document.getElementById('qf-robot-style')){
+      const style=document.createElement('style');
+      style.id='qf-robot-style';
+      style.textContent='@keyframes qfRobotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}@media(prefers-reduced-motion:reduce){[data-qf-auth-robot]{animation:none!important}}.qf-nav-hidden{display:none!important}';
+      document.head.appendChild(style);
+    }
+    auth.prepend(robot);
+  }
+
+  function observeAuthScreen(){
+    if(window.qfAuthObserver) return;
+    window.qfAuthObserver=new MutationObserver(()=>{
+      if(window.currentUser) removeAuthRobots();
+      else ensureAuthRobot();
+      syncAuthChrome();
+    });
+    window.qfAuthObserver.observe(document.body,{childList:true,subtree:true});
   }
 
   async function checkAdmin(){
@@ -36,59 +84,33 @@
       if(!a.error && a.data?.user_id===user.id){adminState=true;return true;}
       const p=await client.from('profiles').select('role').eq('id',user.id).maybeSingle();
       if(!p.error && String(p.data?.role||'').toLowerCase()==='admin'){adminState=true;return true;}
-      try{const r=await client.rpc('is_quantumflow_admin');if(!r.error&&r.data===true){adminState=true;return true;}}catch(e){}
+      const r=await client.rpc('is_quantumflow_admin');
+      if(!r.error && r.data===true){adminState=true;return true;}
     }catch(e){console.warn('QuantumFlow admin check failed:',e);}
-    adminState=false;return false;
+    adminState=false; return false;
+  }
+
+  async function refreshAdminNav(){
+    const ok=await checkAdmin();
+    if(ok) addAdminButton(); else removeAdminButton();
   }
 
   function addAdminButton(){
-    if(adminState!==true||!window.currentUser)return;
-    const nav=document.getElementById('nav'); if(!nav)return;
-    nav.classList.remove('qf-nav-hidden');
-    if(nav.querySelector('[data-qf-admin]'))return;
-    const b=document.createElement('button'); b.type='button'; b.className='nav-btn qf-admin-nav'; b.dataset.qfAdmin='true';
-    b.innerHTML='<span>🛡️</span><span>Admin</span>'; b.title='Admin Dashboard';
-    b.onclick=()=>{window.location.href='./admin.html';}; nav.appendChild(b);
+    if(document.getElementById('qf-admin-nav')) return;
+    const nav=document.getElementById('nav'); if(!nav) return;
+    const btn=document.createElement('button');
+    btn.id='qf-admin-nav'; btn.type='button'; btn.className='nav-item'; btn.textContent='🛡️ Admin';
+    btn.onclick=()=>{location.href='admin.html';};
+    nav.appendChild(btn);
   }
-  function removeAdminButton(){document.querySelectorAll('[data-qf-admin]').forEach(el=>el.remove());}
 
-  async function refreshAdminNav(){
-    if(!window.currentUser){adminState=false;removeAdminButton();syncAuthChrome();return;}
-    await checkAdmin(); if(adminState)addAdminButton(); else removeAdminButton();
-    syncAuthChrome();
-  }
+  function removeAdminButton(){document.getElementById('qf-admin-nav')?.remove();}
 
   function initAdminNav(){
-    if(window.qfAdminNavInitialized)return; window.qfAdminNavInitialized=true;
-    const style=document.createElement('style'); style.id='qf-runtime-nav-style';
-    if(!document.getElementById(style.id)){style.textContent='.qf-nav-hidden{display:none!important}.qf-admin-nav{order:99!important}';document.head.appendChild(style);}
-    const observer=new MutationObserver(()=>{syncAuthChrome();if(adminState===true&&window.currentUser)addAdminButton();});
-    observer.observe(document.body,{childList:true,subtree:true});
-    window.addEventListener('quantumflow:admin-refresh',refreshAdminNav);
-    if(window.supabaseClient?.auth) window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(syncAuthChrome,0));
-    syncAuthChrome(); refreshAdminNav();
-    setTimeout(refreshAdminNav,500); setTimeout(refreshAdminNav,1500); setTimeout(refreshAdminNav,4000);
+    if(window.supabaseClient?.auth?.onAuthStateChange){
+      window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(syncAuthChrome,0));
+    }
   }
 
-  function initAuthRobot(){
-    const style=document.createElement('style'); style.id='qf-auth-robot-style';
-    if(!document.getElementById(style.id)){style.textContent=`
-      .qf-auth-robot{width:92px;height:92px;margin:0 auto 14px;display:grid;place-items:center;border-radius:28px;background:linear-gradient(145deg,rgba(99,102,241,.22),rgba(34,211,238,.12));border:1px solid rgba(125,211,252,.28);box-shadow:0 12px 40px rgba(0,0,0,.18);font-size:54px;animation:qfRobotFloat 3s ease-in-out infinite}
-      .qf-auth-robot span{filter:drop-shadow(0 6px 14px rgba(34,211,238,.35))}
-      @keyframes qfRobotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-      @media(prefers-reduced-motion:reduce){.qf-auth-robot{animation:none}}
-    `;document.head.appendChild(style);}
-    const decorate=()=>{
-      const card=document.querySelector('.auth .card.hero');
-      if(!card||card.querySelector('.qf-auth-robot'))return;
-      const brand=card.querySelector('.brand');
-      const robot=document.createElement('div'); robot.className='qf-auth-robot'; robot.setAttribute('aria-hidden','true'); robot.innerHTML='<span>🤖</span>';
-      if(brand) brand.insertAdjacentElement('beforebegin',robot); else card.prepend(robot);
-    };
-    decorate(); new MutationObserver(decorate).observe(document.body,{childList:true,subtree:true});
-  }
-
-  // Start auth UI decoration immediately; don't wait for the authenticated app runtime.
-  initAuthRobot();
   expose();
 })();
