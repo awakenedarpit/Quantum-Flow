@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1020"><title>QuantumFlow • Admin</title>
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="qf-polish.css"><link rel="stylesheet" href="qf-admin.css?v=20260818-2">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="qf-polish.css"><link rel="stylesheet" href="qf-admin.css?v=20260818-3">
 <style>
 .admin{max-width:1120px;margin:auto;padding:20px 16px 55px}.admin-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.admin-head h1{margin:4px 0}.admin-brand{font-size:13px;color:var(--primary);font-weight:800;letter-spacing:.12em;text-transform:uppercase}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{padding:18px}.stat strong{display:block;font-size:30px;margin-top:8px}.stat small{color:var(--muted)}.section{margin-top:16px}.panel{padding:18px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.section-title h2{margin:0}.toolbar,.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.filters input{margin:0;min-width:220px}.select{padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text)}.chart-wrap{height:330px;position:relative}.table-wrap{overflow:auto}.users table{width:100%;border-collapse:collapse;min-width:780px}.users th,.users td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--border);white-space:nowrap}.users th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--surface2);margin-right:8px;font-weight:800;color:var(--primary);vertical-align:middle}.email{font-weight:650}.status{display:inline-flex;align-items:center;gap:6px}.status:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green)}.empty{text-align:center;padding:30px;color:var(--muted)}.notice{padding:14px;border-radius:14px;margin:12px 0}.error{background:color-mix(in srgb,var(--danger) 10%,transparent);border:1px solid color-mix(in srgb,var(--danger) 22%,var(--border))}.loading{opacity:.65}.muted2{color:var(--muted);font-size:12px}.theme-toggle{min-width:44px}.admin-kicker{display:flex;align-items:center;gap:8px}.admin-kicker .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}.admin-view-head{font-size:11px;font-weight:900;letter-spacing:.08em;color:var(--primary)}@media(max-width:600px){.admin-head{align-items:flex-start}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:25px}.chart-wrap{height:270px}.filters input{min-width:0;flex:1}}
 </style>
 </head>
 <body>
 <main class="admin" id="admin"><div class="card loading"><h2>Loading admin dashboard…</h2><p class="muted">Checking your QuantumFlow administrator access.</p></div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script><script src="supabase.js?v=20260818-2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script><script src="supabase.js?v=20260818-3"></script>
 <script>
 const root=document.getElementById('admin');
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
@@ -29,5 +29,5 @@ async function changeDays(v){days=Number(v);try{const {data,error}=await supabas
 async function searchUsers(){search=document.getElementById('userSearch').value.trim();try{const {data,error}=await supabaseClient.rpc('admin_user_list',{p_search:search||null});if(error)throw error;cache.users=data||[];render()}catch(e){alert(e.message)}}
 function clearSearch(){search='';refreshData()}
 load();setInterval(()=>{if(document.visibilityState==='visible'&&document.hasFocus())refreshData().catch(()=>{})},60000);
-</script><script src="qf-admin.js?v=20260818-2"></script>
+</script><script src="qf-admin.js?v=20260818-3"></script>
 </body></html>
