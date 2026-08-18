@@ -1,1 +1,1 @@
-{"name":"QuantumFlow","short_name":"QuantumFlow","start_url":".","display":"standalone","background_color":"#0b1020","theme_color":"#0b1020","description":"Personal habit, goal and study tracker."}
+{"name":"QuantumFlow • Habit & Study Tracker","short_name":"QuantumFlow","id":"./","start_url":"./","scope":"./","display":"standalone","orientation":"portrait-primary","background_color":"#0b1020","theme_color":"#0b1020","description":"Personal habit, goal, study and progress tracker with XP, analytics and leaderboard.","categories":["productivity","education","lifestyle"]}
