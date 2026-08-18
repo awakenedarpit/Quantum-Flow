@@ -9,6 +9,16 @@
   const toggleTheme=()=>{const n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;localStorage.setItem('qf-theme',n);const b=document.getElementById('qfThemeToggle');if(b)b.textContent=n==='dark'?'☀️ Light':'🌙 Dark'};
   setTheme();
 
+  function cleanupRobots(card){
+    if(!card)return;
+    const keeper=card.querySelector(':scope > .qf-auth-robot');
+    card.querySelectorAll('.auth-robot,.auth-bubble').forEach(el=>el.remove());
+    const robots=[...card.querySelectorAll('.qf-auth-robot')];
+    robots.forEach((el,i)=>{if(i>0||el!==keeper)el.remove()});
+    card.querySelectorAll('img').forEach(img=>{if(!keeper||!keeper.contains(img))img.remove()});
+    if(keeper){keeper.id='qf-auth-robot-single';keeper.querySelectorAll('img').forEach((img,i)=>{if(i>0)img.remove()})}
+  }
+
   function layout(){
     if(document.getElementById('qf-auth-layout-fix'))return;
     const s=document.createElement('style');s.id='qf-auth-layout-fix';
@@ -25,12 +35,13 @@
     const dark=document.documentElement.dataset.theme==='dark';
     card.classList.add('qf-auth-card');
     card.innerHTML=`<button id="qfThemeToggle" class="qf-auth-theme-toggle" type="button">${dark?'☀️ Light':'🌙 Dark'}</button>${robot()}<div class="qf-auth-panel">${mode==='signin'?'<div class="qf-welcome">Welcome to Quantum Flow</div>':''}<div class="qf-auth-title">Beep boop. ${mode==='signup'?'New human detected!':'Who goes there?'}</div><div class="qf-auth-subtitle">${mode==='signup'?'Create your Quantum Flow account and start building better days.':'Log in and keep your momentum going.'}</div><form id="qfAuthForm" class="qf-auth-form" novalidate>${field('email','email','Your email','email','mail')}${field('password','password','Super secret password','current-password','lock')}<button class="qf-auth-submit" type="submit"><span>⚡</span>${mode==='signup'?'CREATE ACCOUNT':'LOG ME IN'}</button></form><p id="authStatus" class="qf-auth-status" aria-live="polite"></p><div class="qf-auth-switch">${mode==='signup'?'Already have an account?':"Don't have an account?"} <button id="qfAuthSwitch" type="button">${mode==='signup'?'Sign in':'Create account'}</button></div><p class="qf-auth-note">Your account is secured with Supabase authentication.</p></div>`;
+    cleanupRobots(card);
     card.querySelector('#qfThemeToggle').onclick=toggleTheme;
     card.querySelector('#qfAuthForm').addEventListener('submit',e=>{e.preventDefault();mode==='signup'?window.qfCreateAccount():window.qfLogin()});
     card.querySelector('#qfAuthSwitch').onclick=()=>{mode=mode==='signup'?'signin':'signup';lastRoot=null;render()};
   }
 
-  function render(){const root=document.querySelector('#app .auth');if(!root)return;if(root!==lastRoot||!root.querySelector('.qf-auth-card')){lastRoot=root;build(root)}}
+  function render(){const root=document.querySelector('#app .auth');if(!root)return;const card=root.querySelector('.card.hero');if(card)cleanupRobots(card);if(root!==lastRoot||!root.querySelector('.qf-auth-card')){lastRoot=root;build(root)}}
   const normalizeEmail=e=>String(e||'').trim().toLowerCase();
   const validateEmail=e=>{const value=normalizeEmail(e);if(!value||value.length>254)return 'Enter a valid email address.';if(/[\s,;<>()[\]\\"']/u.test(value))return 'Enter a valid email address.';const parts=value.split('@');if(parts.length!==2)return 'Enter a valid email address.';const [local,domain]=parts;if(!local||local.length>64||local.startsWith('.')||local.endsWith('.')||local.includes('..'))return 'Enter a valid email address.';if(!/^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+$/i.test(local))return 'Enter a valid email address.';if(!domain||domain.length>253||domain.startsWith('.')||domain.endsWith('.')||domain.includes('..'))return 'Enter a valid email address.';const labels=domain.split('.');if(labels.length<2||labels.some(x=>!x||x.length>63||x.startsWith('-')||x.endsWith('-')||!/^[a-z0-9-]+$/i.test(x)))return 'Enter a valid email address.';const tld=labels.at(-1);if(tld.length<2||/^\d+$/.test(tld))return 'Enter a valid email address.';const blocked=['example.com','example.org','example.net','invalid','localhost','test','test.com','example'];if(blocked.includes(domain)||blocked.some(x=>domain.endsWith('.'+x)))return 'Please use a real email address, not a placeholder/test address.';return '';};
   window.qfTogglePassword=()=>{const i=document.getElementById('password');if(i)i.type=i.type==='password'?'text':'password'};
