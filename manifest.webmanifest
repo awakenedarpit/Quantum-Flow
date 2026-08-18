@@ -1,1 +1,36 @@
-{"name":"Quantum Flow • Habit & Study Tracker","short_name":"Quantum Flow","id":"./","start_url":"./","scope":"./","display":"standalone","orientation":"portrait-primary","background_color":"#eef5ff","theme_color":"#eef5ff","description":"Quantum Flow — habits, goals, study, focus and progress in one place.","categories":["productivity","education","lifestyle"],"icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name": "Quantum Flow • Habit & Study Tracker",
+  "short_name": "Quantum Flow",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef5ff",
+  "theme_color": "#eef5ff",
+  "description": "Quantum Flow — habits, goals, study, focus and progress in one place.",
+  "categories": ["productivity", "education", "lifestyle"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Habits",
+      "short_name": "Habits",
+      "url": "./#habits",
+      "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Progress",
+      "short_name": "Progress",
+      "url": "./#progress",
+      "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}
