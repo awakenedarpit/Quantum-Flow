@@ -34,7 +34,10 @@ async function refreshData(){
   supabaseClient.rpc('admin_stats'),supabaseClient.rpc('admin_user_list',{p_search:search||null}),supabaseClient.rpc('admin_daily_activity',{p_days:days})
  ]);
  if(se||ue||ae)throw new Error(se?.message||ue?.message||ae?.message||'Unable to load admin data');
- cache={stats:stats?.[0]||{},users:users||[],activity:activity||[]};render();
+ // admin_stats returns one JSON object, not an array. The old [0] here silently
+ // converted every metric to 0. Normalize both shapes for compatibility.
+ const normalizedStats=Array.isArray(stats)?(stats[0]||{}):(stats||{});
+ cache={stats:normalizedStats,users:users||[],activity:activity||[]};render();
 }
 function render(){
  const s=cache.stats||{}, users=cache.users||[], a=cache.activity||[];
