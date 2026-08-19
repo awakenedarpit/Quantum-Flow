@@ -1,0 +1,7 @@
+:root{--qf-logo-size:42px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.025em}
+.brand::before{content:'';width:var(--qf-logo-size);height:var(--qf-logo-size);flex:0 0 var(--qf-logo-size);background:url('icon.svg') center/contain no-repeat;border-radius:12px;filter:drop-shadow(0 8px 18px rgba(79,124,255,.18))}
+.auth .brand{font-size:1.25rem;margin-bottom:12px}
+.auth .brand::before{width:54px;height:54px;flex-basis:54px;border-radius:16px}
+.qf-robot-orbit img{display:block;width:64px;height:64px;object-fit:contain;border-radius:18px}
+@media(max-width:600px){:root{--qf-logo-size:36px}.brand{gap:8px}.auth .brand::before{width:48px;height:48px;flex-basis:48px}}
