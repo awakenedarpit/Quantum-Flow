@@ -7,7 +7,7 @@
 
   function model() {
     const wrap = document.querySelector('#app .wrap');
-    if (!wrap || wrap.classList.contains('auth') || !window.state || state.tab !== 'home') return null;
+    if (!wrap || wrap.classList.contains('auth') || typeof state === 'undefined' || state.tab !== 'home') return null;
     const habits = Array.isArray(state.habits) ? state.habits : [];
     const goals = Array.isArray(state.goals) ? state.goals : [];
     const study = Array.isArray(state.study) ? state.study : [];
@@ -22,12 +22,7 @@
   }
 
   function signature(m) {
-    return JSON.stringify({
-      tab: state.tab,
-      habits: m.habits.map(h => [h.id, h.name, h.days?.includes(today())]),
-      goals: m.goals.map(g => [g.id, g.title || g.name, g.progress, g.is_completed]),
-      study: m.study.slice(0, 20).map(s => [s.id, s.duration_minutes, s.completed, s.started_at])
-    });
+    return JSON.stringify({tab: state.tab, habits: m.habits.map(h => [h.id, h.name, h.days?.includes(today())]), goals: m.goals.map(g => [g.id, g.title || g.name, g.progress, g.is_completed]), study: m.study.slice(0, 20).map(s => [s.id, s.duration_minutes, s.completed, s.started_at])});
   }
 
   function action(m) {
@@ -54,16 +49,7 @@
     const card = document.createElement('section');
     card.id = 'qf-smart-command';
     card.className = 'qf-smart-command';
-    card.innerHTML = `
-      <div class="qf-command-glow"></div>
-      <div class="qf-command-top"><div class="qf-command-copy"><span class="qf-kicker">QUANTUM FLOW · TODAY</span><h2>Daily Command Center</h2><p>One calm view of the actions that move your day forward.</p></div><div class="qf-command-ring" style="--qf-p:${pct * 3.6}deg"><b>${pct}%</b><small>today</small></div></div>
-      <div class="qf-command-grid">
-        <div class="qf-command-stat"><span>🌱</span><div><b>${m.doneHabits.length}/${total}</b><small>Habits complete</small></div></div>
-        <div class="qf-command-stat"><span>📚</span><div><b>${Math.round(m.todayStudyMinutes)}m</b><small>Studied today</small></div></div>
-        <div class="qf-command-stat"><span>🎯</span><div><b>${goalProgress}%</b><small>Goal progress</small></div></div>
-        <div class="qf-command-next"><span class="qf-next-icon">⚡</span><div><small>NEXT BEST ACTION</small><b>${m.nextHabit ? esc(m.nextHabit.name) : (m.habits.length ? 'Your habits are done' : 'Start your flow')}</b><p>${m.nextHabit ? 'A small win now keeps your momentum alive.' : goalLabel}</p></div></div>
-      </div>
-      <div class="qf-command-footer"><div class="qf-command-progress"><span style="width:${pct}%"></span></div><div class="qf-command-meta"><span>${m.activeGoals.length} active goal${m.activeGoals.length === 1 ? '' : 's'}</span><span>${Math.round(m.totalStudyMinutes)}m total study</span></div>${action(m)}</div>`;
+    card.innerHTML = `<div class="qf-command-glow"></div><div class="qf-command-top"><div class="qf-command-copy"><span class="qf-kicker">QUANTUM FLOW · TODAY</span><h2>Daily Command Center</h2><p>One calm view of the actions that move your day forward.</p></div><div class="qf-command-ring" style="--qf-p:${pct * 3.6}deg"><b>${pct}%</b><small>today</small></div></div><div class="qf-command-grid"><div class="qf-command-stat"><span>🌱</span><div><b>${m.doneHabits.length}/${total}</b><small>Habits complete</small></div></div><div class="qf-command-stat"><span>📚</span><div><b>${Math.round(m.todayStudyMinutes)}m</b><small>Studied today</small></div></div><div class="qf-command-stat"><span>🎯</span><div><b>${goalProgress}%</b><small>Goal progress</small></div></div><div class="qf-command-next"><span class="qf-next-icon">⚡</span><div><small>NEXT BEST ACTION</small><b>${m.nextHabit ? esc(m.nextHabit.name) : (m.habits.length ? 'Your habits are done' : 'Start your flow')}</b><p>${m.nextHabit ? 'A small win now keeps your momentum alive.' : goalLabel}</p></div></div></div><div class="qf-command-footer"><div class="qf-command-progress"><span style="width:${pct}%"></span></div><div class="qf-command-meta"><span>${m.activeGoals.length} active goal${m.activeGoals.length === 1 ? '' : 's'}</span><span>${Math.round(m.totalStudyMinutes)}m total study</span></div>${action(m)}</div>`;
 
     const top = m.wrap.querySelector('.top');
     if (top) top.insertAdjacentElement('afterend', card); else m.wrap.insertBefore(card, m.wrap.firstChild);
@@ -73,11 +59,7 @@
     const app = document.getElementById('app');
     if (!app) return;
     let queued = false;
-    const schedule = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(() => { queued = false; render(); });
-    };
+    const schedule = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); };
     schedule();
     new MutationObserver(schedule).observe(app, {childList: true, subtree: true});
   });
