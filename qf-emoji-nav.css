@@ -4,8 +4,11 @@
 .nav button b{font-size:0!important;line-height:1!important;display:block!important}
 .nav button b:before{display:inline-block;font-size:22px;line-height:1;transform:translateZ(0);transition:transform .25s cubic-bezier(.22,.8,.24,1),filter .25s ease}
 .nav button.active b:before{transform:translateY(-2px) scale(1.08)}
-/* Home, Habits, Study, Progress, Rank, Goals, Community, Profile, Settings */
+/* Home, Habits, Goals, Study, Progress, Rank, Community, Profile, Settings */
 .nav button:nth-child(1) b:before{content:"🏠"}.nav button:nth-child(2) b:before{content:"🌱"}.nav button:nth-child(3) b:before{content:"📚"}.nav button:nth-child(4) b:before{content:"📈"}.nav button:nth-child(5) b:before{content:"🏆"}.nav button:nth-child(6) b:before{content:"🎯"}.nav button:nth-child(7) b:before{content:"👥"}.nav button:nth-child(8) b:before{content:"👤"}.nav button:nth-child(9) b:before{content:"⚙️"}
+/* Keep Goals immediately beside Habits without changing the underlying tab logic. */
+.nav{display:flex!important}
+.nav button:nth-child(1){order:1}.nav button:nth-child(2){order:2}.nav button:nth-child(6){order:3}.nav button:nth-child(3){order:4}.nav button:nth-child(4){order:5}.nav button:nth-child(5){order:6}.nav button:nth-child(7){order:7}.nav button:nth-child(8){order:8}.nav button:nth-child(9){order:9}
 .nav button:nth-child(1) b:before{filter:drop-shadow(0 3px 5px rgba(79,124,255,.25))}.nav button:nth-child(2) b:before{filter:drop-shadow(0 3px 5px rgba(22,168,107,.25))}.nav button:nth-child(3) b:before{filter:drop-shadow(0 3px 5px rgba(245,158,11,.25))}.nav button:nth-child(4) b:before{filter:drop-shadow(0 3px 5px rgba(139,92,246,.25))}.nav button:nth-child(5) b:before{filter:drop-shadow(0 3px 5px rgba(236,72,153,.25))}
 @media(max-width:650px){.brand:before{width:30px;height:30px;flex-basis:30px;border-radius:10px;background-size:25px 25px;font-size:0}.nav button b:before{font-size:21px}}
 @media(prefers-reduced-motion:reduce){.brand:before,.nav button b:before{transition:none}}
