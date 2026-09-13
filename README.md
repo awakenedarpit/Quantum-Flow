@@ -21,3 +21,9 @@ A mobile-first personal productivity app for habits, goals, study planning, focu
 
 ## Run
 Open `index.html` or serve the folder over HTTP for PWA/service-worker support.
+
+
+<!-- awakenedarpit-credits-contact -->
+## Credits & Contact
+
+Quantum Flow is created and maintained by **Arpit Raj** ([@awakenedarpit](https://github.com/awakenedarpit)). For questions, suggestions, or collaboration, contact Arpit through [GitHub](https://github.com/awakenedarpit) or open an issue in this repository.
