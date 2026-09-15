@@ -22,9 +22,10 @@
     }
     return true;
   };
+  const localDateKey = d => { const x=d instanceof Date?d:new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
   const streakFrom = days => {
     const set=new Set(days||[]);let n=0,d=new Date();
-    while(set.has(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}
+    while(set.has(localDateKey(d))){n++;d.setDate(d.getDate()-1)}
     return n;
   };
   async function checkHabit(id){
@@ -51,7 +52,7 @@
     if(typeof originalHabit==='function'&&!originalHabit.__qfAchievementHook){
       const wrapped=async function(id){
         const h=(window.state?.habits||[]).find(x=>x.id===id);window.__qfLastHabitName=h?.name||'Habit';
-        const before=h?.days?.includes?.(new Date().toISOString().slice(0,10));
+        const before=h?.days?.includes?.(localDateKey(new Date()));
         const result=await originalHabit.apply(this,arguments);
         if(!before) await checkHabit(id);
         return result;
