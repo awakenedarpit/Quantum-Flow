@@ -1,7 +1,7 @@
 const KEY='quantumflow-v2';
 const quotesFallback=['Consistency is a superpower when you practice it every day.','Small progress every day adds up to remarkable results.','Do the next useful thing.','Your future is built from ordinary days used well.','Focus on the process. Let the progress follow.','You do not need a perfect day. You need a meaningful one.'];
 let state={tab:'home',habits:[],study:[],goals:[],quote:0,quotes:[],profile:null,leaderboard:[],loading:true,error:null};
-let currentUser=null,timer=null,secs=Number(localStorage.getItem('qf-focus-secs')||1500),timerTotal=secs,timerStartedAt=null;
+let currentUser=null,timer=null;const habitOps=new Set();let secs=Number(localStorage.getItem('qf-focus-secs')||1500),timerTotal=secs,timerStartedAt=null;
 // Use the user's local calendar day; UTC dates make streaks flip around midnight.
 const localDateKey=d=>{const x=d instanceof Date?d:new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
 const today=()=>localDateKey(new Date());
@@ -42,7 +42,34 @@ function render(){const app=document.getElementById('app');if(!app)return;if(sta
 function openTab(tab){state.tab=tab;if(tab==='leaderboard')state.leaderboard=[];render()}
 async function newQuote(){if(state.quotes.length){state.quote=(state.quote+1)%state.quotes.length}else state.quote=(state.quote+1)%quotesFallback.length;render();toast('New quote ✦')}
 async function addHabit(){const n=prompt('Habit name');if(!n?.trim())return;const {data,error}=await withTimeout(supabaseClient.from('habits').insert({user_id:currentUser.id,name:n.trim()}).select().single());if(error)return toast(error.message);state.habits.push({...data,days:[]});render();toast('Habit created')}
-async function toggleHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;try{if(window.qfRequireSession)await window.qfRequireSession()}catch(error){return toast(error?.message||'Please sign in again.')}const d=today();if(done(h)){const {error}=await withTimeout(supabaseClient.from('habit_completions').delete().eq('habit_id',id).eq('completed_on',d).eq('user_id',currentUser.id));if(error)return toast(error.message);h.days=h.days.filter(x=>x!==d);toast('Habit unchecked')}else{const {data,error}=await withTimeout(supabaseClient.from('habit_completions').insert({habit_id:id,user_id:currentUser.id,completed_on:d}).select().single());if(error)return toast(error.message);h.days.push(d);await awardXP(`habit:${id}:${d}`,10);toast('Habit completed ✓ +10 XP')}await refreshProfile();render()}
+async function toggleHabit(id){
+  const h=state.habits.find(x=>x.id===id);if(!h)return;
+  if(habitOps.has(id))return toast('Saving this habit…');
+  habitOps.add(id);
+  const button=[...document.querySelectorAll('.check')].find(b=>String(b.getAttribute('onclick')||'').includes(`'${id}'`));
+  if(button){button.disabled=true;button.setAttribute('aria-busy','true')}
+  try{
+    if(window.qfRequireSession)await window.qfRequireSession();
+    const d=today();
+    if(done(h)){
+      const {error}=await withTimeout(supabaseClient.from('habit_completions').delete().eq('habit_id',id).eq('completed_on',d).eq('user_id',currentUser.id));
+      if(error)throw error;
+      h.days=h.days.filter(x=>x!==d);toast('Habit unchecked');
+    }else{
+      const {data,error}=await withTimeout(supabaseClient.from('habit_completions').insert({habit_id:id,user_id:currentUser.id,completed_on:d}).select().single());
+      if(error)throw error;
+      if(!h.days.includes(d))h.days.push(d);
+      await awardXP(`habit:${id}:${d}`,10);toast('Habit completed ✓ +10 XP');
+    }
+    await refreshProfile();render();
+  }catch(error){
+    const msg=String(error?.message||'').toLowerCase();
+    toast(/fetch|network|timeout|failed to fetch/.test(msg)?'Could not save this habit. Check your connection and try again.':(error?.message||'Could not save this habit.'));
+  }finally{
+    habitOps.delete(id);
+    if(button){button.disabled=false;button.removeAttribute('aria-busy')}
+  }
+}
 async function addStudy(){const n=prompt('Study session name');if(!n?.trim())return;const d=Number(prompt('Duration in minutes','30'));if(!Number.isFinite(d)||d<=0)return;const {data,error}=await withTimeout(supabaseClient.from('study_sessions').insert({user_id:currentUser.id,title:n.trim(),started_at:new Date(Date.now()-d*60000).toISOString(),ended_at:new Date().toISOString(),duration_minutes:d,completed:true}).select().single());if(error)return toast(error.message);state.study.unshift(data);await awardXP(`study:${data.id}`,Math.max(10,Math.min(60,Math.round(d/2))));await refreshProfile();render();toast('Study session saved ✓')}
 async function addGoal(){const n=prompt('Goal name');if(!n?.trim())return;const {data,error}=await withTimeout(supabaseClient.from('goals').insert({user_id:currentUser.id,title:n.trim(),progress:0}).select().single());if(error)return toast(error.message);const {data:milestone}=await withTimeout(supabaseClient.from('goal_milestones').insert({goal_id:data.id,user_id:currentUser.id,title:'First milestone',sort_order:0}).select().single());state.goals.push({...data,name:data.title,milestones:milestone?[milestone]:[]});render();toast('Goal created')}
 async function advanceGoal(id,current){const next=Math.min(100,current+10);const {error}=await withTimeout(supabaseClient.from('goals').update({progress:next,is_completed:next===100,updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',currentUser.id));if(error)return toast(error.message);const g=state.goals.find(x=>x.id===id);if(g){g.progress=next;g.is_completed=next===100}if(next===100&&current<100){await awardXP(`goal:${id}:complete`,50);toast('Goal completed 🎯 +50 XP')}else toast('Goal updated');await refreshProfile();render()}
