@@ -69,3 +69,29 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .empty-state{padding:48px 22px!important;text-align:center}
 @media(prefers-reduced-motion:reduce){.card:hover,.btn:hover{transform:none!important}}
 
+
+
+/* Dashboard navigation: one persistent vertical sidebar on every authenticated page. */
+:root{--qf-sidebar-width:236px;--qf-sidebar-rail:86px}
+body:not(:has(#app .auth)){padding-bottom:24px!important}
+body:not(:has(#app .auth)) #app{margin-left:var(--qf-sidebar-width)!important;min-height:100vh}
+body:not(:has(#app .auth)) #nav.nav{position:fixed!important;inset:0 auto 0 0!important;width:var(--qf-sidebar-width)!important;height:100vh!important;min-height:100vh!important;max-height:none!important;margin:0!important;transform:none!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;padding:22px 14px!important;border:0!important;border-right:1px solid var(--border)!important;border-radius:0!important;background:color-mix(in srgb,var(--surface) 92%,transparent)!important;box-shadow:18px 0 55px rgba(15,23,42,.12)!important;overflow-y:auto!important;overflow-x:hidden!important;z-index:10000!important}
+body:not(:has(#app .auth)) #nav.nav:before{content:'QUANTUM FLOW';display:block;padding:8px 12px 20px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.14em;white-space:nowrap}
+body:not(:has(#app .auth)) #nav.nav button{width:100%!important;min-height:52px!important;height:52px!important;flex:0 0 52px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;padding:0 13px!important;border:1px solid transparent!important;border-radius:15px!important;color:var(--muted)!important;font-size:13px!important;font-weight:750!important;white-space:nowrap!important;text-align:left!important;overflow:visible!important}
+body:not(:has(#app .auth)) #nav.nav button b{display:grid!important;place-items:center!important;width:24px!important;height:24px!important;flex:0 0 24px!important;font-size:0!important;line-height:1!important}
+body:not(:has(#app .auth)) #nav.nav button b:before{font-size:21px!important;line-height:1!important;filter:none!important}
+body:not(:has(#app .auth)) #nav.nav button:hover{transform:translateX(3px)!important;background:color-mix(in srgb,var(--qf-page-accent,var(--primary)) 8%,transparent)!important;color:var(--text)!important}
+body:not(:has(#app .auth)) #nav.nav button.active{background:linear-gradient(135deg,color-mix(in srgb,var(--qf-page-accent,var(--primary)) 18%,transparent),color-mix(in srgb,var(--qf-page-accent-2,var(--secondary)) 12%,transparent))!important;color:var(--qf-page-accent,var(--primary))!important;border-color:color-mix(in srgb,var(--qf-page-accent,var(--primary)) 22%,var(--border))!important;box-shadow:inset 3px 0 0 var(--qf-page-accent,var(--primary)),0 10px 25px color-mix(in srgb,var(--qf-page-accent,var(--primary)) 10%,transparent)!important}
+body:not(:has(#app .auth)) #nav.nav button.active b{filter:drop-shadow(0 0 8px color-mix(in srgb,var(--qf-page-accent,var(--primary)) 60%,transparent))!important}
+body:not(:has(#app .auth)) .qf-install{left:calc(var(--qf-sidebar-width) + 24px)!important;right:24px!important;width:auto!important;transform:none!important;bottom:24px!important}
+@media(max-width:760px){
+  :root{--qf-sidebar-width:86px}
+  body:not(:has(#app .auth)) #app{margin-left:var(--qf-sidebar-width)!important}
+  body:not(:has(#app .auth)) #nav.nav{padding:16px 8px!important;gap:7px!important}
+  body:not(:has(#app .auth)) #nav.nav:before{content:'QF';padding:8px 0 18px;text-align:center;font-size:13px;letter-spacing:.08em}
+  body:not(:has(#app .auth)) #nav.nav button{justify-content:center!important;gap:3px!important;padding:0!important;font-size:0!important;border-radius:13px!important}
+  body:not(:has(#app .auth)) #nav.nav button b{width:100%!important;height:28px!important;flex-basis:100%!important}
+  body:not(:has(#app .auth)) #nav.nav button b:before{font-size:20px!important}
+  body:not(:has(#app .auth)) .qf-install{left:calc(var(--qf-sidebar-width) + 10px)!important;right:10px!important;bottom:12px!important}
+}
+@media(prefers-reduced-motion:reduce){body:not(:has(#app .auth)) #nav.nav button:hover{transform:none!important}}
