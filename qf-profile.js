@@ -24,6 +24,7 @@
     if (button) { button.disabled = true; button.textContent = 'Saving…'; }
     if (status) status.textContent = 'Saving your profile…';
     try {
+      if (window.qfRequireSession) await window.qfRequireSession();
       const authResult = await supabaseClient.auth.updateUser({ data: { display_name: name } });
       if (authResult.error) throw authResult.error;
 
@@ -54,7 +55,8 @@
     } catch (error) {
       console.error('Profile update failed', error);
       if (status) status.textContent = '';
-      toast(error?.message || 'Could not update your profile.');
+      const message = String(error?.message || 'Could not update your profile.');
+      toast(/row-level security|permission denied|not authorized/i.test(message) ? 'Your session cannot write this profile. Please sign out and sign in again.' : message);
     } finally {
       if (button) { button.disabled = false; button.textContent = 'Update profile'; }
     }
