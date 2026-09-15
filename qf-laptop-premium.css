@@ -109,3 +109,5 @@ body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav .qf-sidebar-fold::befor
 .qf-create-modal,.qf-editor-backdrop,.qf-profile-modal-backdrop,.qf-group-modal,.qf-modal,.modal-backdrop{z-index:30000!important}
 .qf-create-modal .qf-create-panel,.qf-editor-card,.qf-profile-modal,.qf-group-modal>*,.qf-modal>*{z-index:30001!important}
 @media(max-width:760px){body:not(:has(#app .auth)).qf-sidebar-collapsed{--qf-sidebar-width:64px}.qf-sidebar-fold{display:grid!important;place-items:center!important}}
+
+.qf-inline-actions{display:inline-flex;align-items:center;gap:6px;margin-left:8px;flex:0 0 auto}.qf-inline-actions .icon-btn{min-width:34px;height:34px;padding:0!important}.qf-goal-actions .icon-btn{min-width:38px;height:38px;padding:0!important}
