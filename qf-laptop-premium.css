@@ -95,3 +95,17 @@ body:not(:has(#app .auth)) .qf-install{left:calc(var(--qf-sidebar-width) + 24px)
   body:not(:has(#app .auth)) .qf-install{left:calc(var(--qf-sidebar-width) + 10px)!important;right:10px!important;bottom:12px!important}
 }
 @media(prefers-reduced-motion:reduce){body:not(:has(#app .auth)) #nav.nav button:hover{transform:none!important}}
+
+
+/* Foldable dashboard rail: keeps creation dialogs and content panels unobstructed. */
+body:not(:has(#app .auth)).qf-sidebar-collapsed{--qf-sidebar-width:78px}
+body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav:before{content:'QF';padding-left:0;padding-right:0;text-align:center;letter-spacing:.08em}
+body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav button{justify-content:center!important;padding-inline:0!important;gap:0!important;font-size:0!important}
+body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav button b{width:100%!important;flex-basis:100%!important}
+body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav .qf-sidebar-fold{font-size:0!important}
+body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav .qf-sidebar-fold::after{content:'›';font-size:24px!important}
+.qf-sidebar-fold{order:99!important;margin-top:auto!important;min-height:44px!important;height:44px!important;flex-basis:44px!important;background:color-mix(in srgb,var(--qf-page-accent,var(--primary)) 8%,transparent)!important;border-color:color-mix(in srgb,var(--qf-page-accent,var(--primary)) 20%,var(--border))!important;color:var(--qf-page-accent,var(--primary))!important}
+body:not(:has(#app .auth)).qf-sidebar-collapsed #nav.nav .qf-sidebar-fold::before{display:none!important}
+.qf-create-modal,.qf-editor-backdrop,.qf-profile-modal-backdrop,.qf-group-modal,.qf-modal,.modal-backdrop{z-index:30000!important}
+.qf-create-modal .qf-create-panel,.qf-editor-card,.qf-profile-modal,.qf-group-modal>*,.qf-modal>*{z-index:30001!important}
+@media(max-width:760px){body:not(:has(#app .auth)).qf-sidebar-collapsed{--qf-sidebar-width:64px}.qf-sidebar-fold{display:grid!important;place-items:center!important}}

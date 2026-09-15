@@ -38,19 +38,21 @@
       </div>`,'Goals');
     }
 
+    const rankDelay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     async function loadLeaderboard(){
-      const results=await Promise.allSettled([
-        window.supabaseClient.rpc('leaderboard_top',{p_limit:50}),
-        window.supabaseClient.rpc('leaderboard',{limit_count:50})
-      ]);
-      const top=results[0].status==='fulfilled'&&results[0].value?.data||[];
-      const detailed=results[1].status==='fulfilled'&&results[1].value?.data||[];
-      const topErr=results[0].status==='fulfilled'?results[0].value?.error:null;
-      const detailErr=results[1].status==='fulfilled'?results[1].value?.error:null;
-      if(!top.length && !detailed.length && (topErr||detailErr)) throw new Error(topErr?.message||detailErr?.message||'Leaderboard could not be loaded.');
-      const streakByName=new Map(detailed.map(r=>[String(r.display_name||'').toLowerCase(),Number(r.streak_days||0)]));
-      const rows=top.length?top.map(r=>({...r,streak_days:streakByName.get(String(r.display_name||'').toLowerCase())||0})):detailed.map(r=>({rank:r.rank,display_name:r.display_name,xp:r.xp,streak_days:r.streak_days,user_id:null}));
-      return rows;
+      let topError=null;
+      for(let attempt=0;attempt<3;attempt++){
+        try{
+          if(window.qfRequireSession) await window.qfRequireSession();
+          const top=await window.supabaseClient.rpc('leaderboard_top',{p_limit:50});
+          if(!top.error && Array.isArray(top.data)) return top.data;
+          topError=top.error||new Error('Leaderboard could not be loaded.');
+        }catch(e){topError=e}
+        if(attempt<2) await rankDelay(350*(attempt+1));
+      }
+      const fallback=await window.supabaseClient.from('profiles').select('id,display_name,xp,leaderboard_visible,created_at').eq('leaderboard_visible',true).order('xp',{ascending:false}).order('created_at',{ascending:true}).limit(100);
+      if(fallback.error) throw topError||fallback.error;
+      return (fallback.data||[]).map((p,i)=>({rank:i+1,user_id:p.id,display_name:p.display_name||'Quantum User',xp:Number(p.xp||0),streak_days:0}));
     }
 
     async function leaderboardPage(){
@@ -73,12 +75,15 @@
       return null;
     };
 
+    let renderId=0;
     window.render=async function(){
+      const currentRender=++renderId;
       const custom=await window.qfRenderEnhancedPages();
+      if(currentRender!==renderId)return;
       if(custom!==null){const app=document.getElementById('app');if(app)app.innerHTML=custom;nav();return;}
       const result=baseRender();
       if(result && typeof result.then==='function') await result;
-      nav();
+      if(currentRender===renderId)nav();
     };
     nav();
   };

@@ -1,0 +1,7 @@
+/* Quantum Flow — persistent foldable dashboard sidebar */
+(() => {
+  const KEY='qf-sidebar-collapsed';
+  const apply=()=>{const nav=document.getElementById('nav');if(!nav||document.querySelector('#app .auth'))return;let button=nav.querySelector('.qf-sidebar-fold');if(!button){button=document.createElement('button');button.type='button';button.className='qf-sidebar-fold';button.setAttribute('aria-label','Collapse sidebar');button.title='Collapse sidebar';button.innerHTML='<b>‹</b><span>Collapse sidebar</span>';button.addEventListener('click',()=>{document.body.classList.toggle('qf-sidebar-collapsed');const collapsed=document.body.classList.contains('qf-sidebar-collapsed');localStorage.setItem(KEY,collapsed?'1':'0');button.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');button.title=collapsed?'Expand sidebar':'Collapse sidebar'});nav.appendChild(button)}const collapsed=localStorage.getItem(KEY)==='1';document.body.classList.toggle('qf-sidebar-collapsed',collapsed);button.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');button.title=collapsed?'Expand sidebar':'Collapse sidebar'};
+  const boot=()=>{apply();new MutationObserver(apply).observe(document.getElementById('nav')||document.body,{childList:true,subtree:true})};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
